@@ -27,7 +27,8 @@ class SuperTuxDataset(Dataset):
     def __getitem__(self, idx):
         tuple = self.dataset[idx]
         image_array = np.array(Image.open(tuple[0]))
-        return (self.image_to_tensor(image_array), tuple[1])
+        return self.image_to_tensor(image_array), tuple[1]
+
 
 def load_data(dataset_path, num_workers=0, batch_size=128):
     dataset = SuperTuxDataset(dataset_path)

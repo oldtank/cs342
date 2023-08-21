@@ -14,7 +14,6 @@ class SuperTuxDataset(Dataset):
         with open(dataset_path + '/labels.csv', "r") as file:
             reader = csv.reader(file)
             header = next(reader)
-            print(header)
             line_number = 0
             self.dataset = {}
             for row in reader:

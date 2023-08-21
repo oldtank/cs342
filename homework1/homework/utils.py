@@ -10,22 +10,23 @@ LABEL_NAMES = ['background', 'kart', 'pickup', 'nitro', 'bomb', 'projectile']
 
 class SuperTuxDataset(Dataset):
     def __init__(self, dataset_path):
+        self.data = []
+        self.labels = []
         self.image_to_tensor = transforms.ToTensor()
         with open(dataset_path + '/labels.csv', "r") as file:
             reader = csv.reader(file)
             header = next(reader)
-            line_number = 0
             self.dataset = {}
             for row in reader:
                 image_array = np.array(Image.open(dataset_path + '/' + row[0]))
-                self.dataset[line_number] = (self.image_to_tensor(image_array), LABEL_NAMES.index(row[1]))
-                line_number = line_number + 1
+                self.data.append(self.image_to_tensor(image_array))
+                self.labels.append(LABEL_NAMES.index(row[1]))
 
     def __len__(self):
-        return len(self.dataset)
+        return len(self.labels)
 
     def __getitem__(self, idx):
-        return self.dataset[idx]
+        return self.data[idx], self.labels[idx]
 
 
 def load_data(dataset_path, num_workers=0, batch_size=128):

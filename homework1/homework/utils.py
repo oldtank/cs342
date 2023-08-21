@@ -18,16 +18,15 @@ class SuperTuxDataset(Dataset):
             line_number = 0
             self.dataset = {}
             for row in reader:
-                self.dataset[line_number] = (dataset_path + '/' + row[0], LABEL_NAMES.index(row[1]))
+                image_array = np.array(Image.open(dataset_path + '/' + row[0]))
+                self.dataset[line_number] = (self.image_to_tensor(image_array), LABEL_NAMES.index(row[1]))
                 line_number = line_number + 1
 
     def __len__(self):
         return len(self.dataset)
 
     def __getitem__(self, idx):
-        tuple = self.dataset[idx]
-        image_array = np.array(Image.open(tuple[0]))
-        return self.image_to_tensor(image_array), tuple[1]
+        return self.dataset[idx]
 
 
 def load_data(dataset_path, num_workers=0, batch_size=128):

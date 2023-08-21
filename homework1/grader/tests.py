@@ -57,9 +57,7 @@ class DatasetGrader(Grader):
 
         # Test image mean/std
         target_mean, target_std = [0.3521554, 0.30068502, 0.28527516], [0.18182722, 0.18656468, 0.15938024]
-        print("about to assign means")
         means = [i.mean((1, 2)).numpy() for i, l in self.valid_data]
-        print("got means")
         mean = np.mean(means, axis=0)
         std = np.std(means, axis=0)
 

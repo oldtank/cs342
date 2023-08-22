@@ -9,6 +9,7 @@ def train(args):
     valid_logger = tb.SummaryWriter('homework/logs/linear/valid', flush_secs=1)
 
     n_epochs = args.epoch
+    batch_size = args.batch
 
     # get model
     model = model_factory[args.model]()
@@ -20,7 +21,7 @@ def train(args):
     optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=1e-4)
 
     # load data
-    train_data_loader = load_data('data/train')
+    train_data_loader = load_data('data/train', batch_size=batch_size)
     # valid_data_loader = load_data('data/valid')
 
     global_step = 0
@@ -43,7 +44,7 @@ def train(args):
         #     valid_logger.add_scalar('valid/accuracy', accuracy(valid_output, valid_label), global_step=global_step)
         #     break
 
-    # save_model(model)
+    save_model(model)
 
 
 if __name__ == '__main__':
@@ -53,6 +54,7 @@ if __name__ == '__main__':
 
     parser.add_argument('-m', '--model', choices=['linear', 'mlp'], default='linear')
     parser.add_argument('-e', '--epoch', default=100)
+    parser.add_argument('-b', '--batch', default=128)
     # Put custom arguments here
 
     args = parser.parse_args()

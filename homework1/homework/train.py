@@ -53,8 +53,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-m', '--model', choices=['linear', 'mlp'], default='linear')
-    parser.add_argument('-e', '--epoch', default=100)
-    parser.add_argument('-b', '--batch', default=128)
+    parser.add_argument('-e', '--epoch', default=100, type=int)
+    parser.add_argument('-b', '--batch', default=128, type=int)
     # Put custom arguments here
 
     args = parser.parse_args()

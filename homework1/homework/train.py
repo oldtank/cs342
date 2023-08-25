@@ -6,6 +6,7 @@ import torch.utils.tensorboard as tb
 
 def train(args):
     train_logger = tb.SummaryWriter('homework/logs/' + args.model + '/train', flush_secs=1)
+    valid_logger = tb.SummaryWriter('homework/logs/' + args.model + '/valid', flush_secs=1)
 
     n_epochs = args.epoch
     batch_size = args.batch
@@ -21,6 +22,7 @@ def train(args):
 
     # load data
     train_data_loader = load_data('data/train', batch_size=batch_size)
+    valid_data_loader = load_data('data/valid', batch_size=1000)
 
     global_step = 0
     for epoc in range(n_epochs):
@@ -36,6 +38,9 @@ def train(args):
             optimizer.step()
 
             global_step += 1
+
+        valid_data, valid_label = next(iter(valid_data_loader))
+        valid_logger.add_scalar('valid/accuracy', accuracy(model(valid_data), valid_label), global_step=global_step)
 
     save_model(model)
 

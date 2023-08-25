@@ -21,20 +21,12 @@ class LinearClassifier(torch.nn.Module):
 class MLPClassifier(torch.nn.Module):
     def __init__(self):
         super().__init__()
-
-        """
-        Your code here
-        """
-        raise NotImplementedError('MLPClassifier.__init__')
+        layers = [torch.nn.Linear(in_features=3 * 64 * 64, out_features=100), torch.nn.ReLU(),
+                  torch.nn.Linear(in_features=100, out_features=6)]
+        self.network = torch.nn.Sequential(*layers)
 
     def forward(self, x):
-        """
-        Your code here
-
-        @x: torch.Tensor((B,3,64,64))
-        @return: torch.Tensor((B,6))
-        """
-        raise NotImplementedError('MLPClassifier.forward')
+        return self.network(x.view(x.size()[0], -1))
 
 
 model_factory = {

@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import Dataset
 
 
-# THIS_DIR = path.dirname(path.abspath(__file__))
+THIS_DIR = path.dirname(path.abspath(__file__))
 
 
 def get_transform(resize=None, random_crop=None, random_horizontal_flip=False, normalize=False, is_resnet=False):
@@ -31,7 +31,7 @@ def get_transform(resize=None, random_crop=None, random_horizontal_flip=False, n
 
 def dogs_and_cats_dataset(split='train', transform=None):
 	import torchvision
-	return torchvision.datasets.ImageFolder(path.join('dogs_and_cats', split), transform=transform)
+	return torchvision.datasets.ImageFolder(path.join(THIS_DIR, 'dogs_and_cats', split), transform=transform)
 
 
 def get_dogs_and_cats(split='train', batch_size=1, num_workers=4, **kwargs):

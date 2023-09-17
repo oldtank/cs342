@@ -68,7 +68,7 @@ def train(args):
         print('epoch = % 3d   train accuracy = %0.3f   valid accuracy = %0.3f' % (
             epoc, np.mean(accuracies), np.mean(val_accuracies)))
 
-    save_model(model.detach().cpu)
+    save_model(model)
 
 
 if __name__ == '__main__':

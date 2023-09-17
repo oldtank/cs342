@@ -16,26 +16,32 @@ class SuperTuxDataset(Dataset):
     def __init__(self, dataset_path):
         """
         Your code here
-        Hint: Use your solution (or the master solution) to HW1 / HW2
-        Hint: If you're loading (and storing) PIL images here, make sure to call image.load(),
-              to avoid an OS error for too many open files.
-        Hint: Do not store torch.Tensor's as data here, but use PIL images, torchvision.transforms expects PIL images
-              for most transformations.
+        Hint: Use the python csv library to parse labels.csv
         """
-        raise NotImplementedError('SuperTuxDataset.__init__')
+        import csv
+        from os import path
+        self.data = []
+        to_tensor = transforms.ToTensor()
+        with open(path.join(dataset_path, 'labels.csv'), newline='') as f:
+            reader = csv.reader(f)
+            for fname, label, _ in reader:
+                if label in LABEL_NAMES:
+                    image = Image.open(path.join(dataset_path, fname))
+                    label_id = LABEL_NAMES.index(label)
+                    self.data.append((to_tensor(image), label_id))
 
     def __len__(self):
         """
         Your code here
         """
-        raise NotImplementedError('SuperTuxDataset.__len__')
+        return len(self.data)
 
     def __getitem__(self, idx):
         """
         Your code here
+        return a tuple: img, label
         """
-        raise NotImplementedError('SuperTuxDataset.__getitem__')
-        return img, label
+        return self.data[idx]
 
 
 class DenseSuperTuxDataset(Dataset):
@@ -121,6 +127,10 @@ class ConfusionMatrix(object):
     def per_class(self):
         return self.matrix / (self.matrix.sum(1, keepdims=True) + 1e-5)
 
+
+def accuracy(outputs, labels):
+    outputs_idx = outputs.max(1)[1].type_as(labels)
+    return outputs_idx.eq(labels).float().mean()
 
 if __name__ == '__main__':
     dataset = DenseSuperTuxDataset('dense_data/train', transform=dense_transforms.Compose(

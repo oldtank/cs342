@@ -10,5 +10,7 @@ if __name__ == '__main__':
     for data, label in train_data:
         images.append(data[None, :])
     concat=torch.concat(images, dim=0)
-    print("mean: {torch.mean(concat, dim=[0,2,3])}")
-    print("std:  {torch.std(concat, dim=[0,2,3])}")
+    mean = torch.mean(concat, dim=[0,2,3])
+    std = torch.std(concat, dim=[0,2,3])
+    print("mean: " + repr(mean))
+    print("std:  " + repr(std))

@@ -26,7 +26,7 @@ def train(args):
 
     # data loader
     train_data_loader = load_data('data/train', batch_size=batch_size, random_crop=(50,50), flip=True, color_aug=True, random_erase=True)
-    valid_data_loader = load_data('data/valid', batch_size=batch_size)
+    valid_data_loader = load_data('data/valid', batch_size=batch_size, resize=(50,50))
 
     # optimizer
     # optimizer = torch.optim.Adam(model.parameters())

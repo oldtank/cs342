@@ -32,6 +32,8 @@ def train(args):
     # optimizer = torch.optim.Adam(model.parameters())
     optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=1e-4)
 
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', patience=50)
+
     global_step = 0
     for epoc in range(n_epochs):
         model.train()
@@ -70,6 +72,9 @@ def train(args):
         valid_logger.add_scalar('accuracy', np.mean(val_accuracies), global_step=global_step)
         print('epoch = % 3d   train accuracy = %0.3f   valid accuracy = %0.3f' % (
             epoc, np.mean(accuracies), np.mean(val_accuracies)))
+
+        train_logger.add_scalar('lr', optimizer.param_groups[0]['lr'], global_step=global_step)
+        scheduler.step(np.mean(val_accuracies))
 
     save_model(model)
 

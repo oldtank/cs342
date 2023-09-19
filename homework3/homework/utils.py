@@ -26,7 +26,7 @@ class SuperTuxDataset(Dataset):
         tf = []
         resize=(128,128)
         tf.append(transforms.Resize(resize))
-        tf.append(transforms.RandomCrop(resize))
+        # tf.append(transforms.RandomCrop(resize))
         tf.append(transforms.RandomHorizontalFlip())
         tf.append(transforms.ToTensor())
         tf.append(transforms.Normalize(mean=[0.3234, 0.3310, 0.3444], std=[0.2524, 0.2219, 0.2470]))

@@ -2,7 +2,7 @@ import torch
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
-from utils import SuperTuxDataset
+from .utils import SuperTuxDataset
 
 if __name__ == '__main__':
     train_data = SuperTuxDataset('../data/train')

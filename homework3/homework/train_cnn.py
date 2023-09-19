@@ -77,7 +77,7 @@ def train(args):
         train_logger.add_scalar('lr', optimizer.param_groups[0]['lr'], global_step=global_step)
         scheduler.step(np.mean(val_accuracies))
 
-    save_model(model)
+    save_model(model.cpu())
 
 
 if __name__ == '__main__':

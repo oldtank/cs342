@@ -5,7 +5,7 @@ from torchvision import transforms
 from .utils import SuperTuxDataset
 
 if __name__ == '__main__':
-    train_data = SuperTuxDataset('../data/train')
+    train_data = SuperTuxDataset('data/train')
     images = []
     for data, label in train_data:
         images.append(data[None, :])

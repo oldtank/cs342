@@ -13,7 +13,7 @@ DENSE_CLASS_DISTRIBUTION = [0.52683655, 0.02929112, 0.4352989, 0.0044619, 0.0041
 
 
 class SuperTuxDataset(Dataset):
-    def __init__(self, dataset_path):
+    def __init__(self, dataset_path, resize=None, random_crop=None, flip=False):
         """
         Your code here
         Hint: Use the python csv library to parse labels.csv
@@ -24,10 +24,15 @@ class SuperTuxDataset(Dataset):
 
         #transforms to apply to the image
         tf = []
-        resize=(128,128)
-        tf.append(transforms.Resize(resize))
-        tf.append(transforms.RandomCrop(resize))
-        tf.append(transforms.RandomHorizontalFlip())
+        if resize is not None:
+            tf.append(transforms.Resize(resize))
+
+        if random_crop is not None:
+            # tf.append(transforms.Resize(resize))
+            tf.append(transforms.RandomCrop(random_crop))
+
+        if flip:
+            tf.append(transforms.RandomHorizontalFlip())
         tf.append(transforms.ToTensor())
         tf.append(transforms.Normalize(mean=[0.3234, 0.3310, 0.3444], std=[0.2524, 0.2219, 0.2470]))
         transform_to_perform = transforms.Compose(tf)

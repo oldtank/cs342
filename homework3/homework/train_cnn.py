@@ -32,7 +32,7 @@ def train(args):
     # optimizer = torch.optim.Adam(model.parameters())
     optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=1e-4)
 
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', patience=50)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', patience=10)
 
     global_step = 0
     for epoc in range(n_epochs):

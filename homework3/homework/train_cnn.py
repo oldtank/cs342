@@ -33,6 +33,7 @@ def train(args):
 
     global_step = 0
     for epoc in range(n_epochs):
+        model.train()
         accuracies = []
         for batch_data, batch_label in train_data_loader:
             if device is not None:
@@ -58,6 +59,7 @@ def train(args):
         if train_logger is not None:
             train_logger.add_scalar('accuracy', np.mean(accuracies), global_step=global_step)
 
+        model.eval()
         val_accuracies = []
         for batch_data, batch_label in valid_data_loader:
             if device is not None:

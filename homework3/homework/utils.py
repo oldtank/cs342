@@ -21,19 +21,26 @@ class SuperTuxDataset(Dataset):
         import csv
         from os import path
         self.data = []
-        to_tensor = transforms.ToTensor()
+
+        #transforms to apply to the image
+        tf = []
+        resize=(128,128)
+        tf.append(transforms.Resize(resize))
+        tf.append(transforms.RandomCrop(resize))
+        tf.append(transforms.RandomHorizontalFlip())
+        tf.append(transforms.ToTensor())
+        tf.append(transforms.Normalize(mean=[0.3234, 0.3310, 0.3444], std=[0.2524, 0.2219, 0.2470]))
+        transform_to_perform = transforms.Compose(tf)
+
         with open(path.join(dataset_path, 'labels.csv'), newline='') as f:
             reader = csv.reader(f)
             for fname, label, _ in reader:
                 if label in LABEL_NAMES:
                     image = Image.open(path.join(dataset_path, fname))
                     label_id = LABEL_NAMES.index(label)
-                    self.data.append((to_tensor(image), label_id))
+                    self.data.append((transform_to_perform(image), label_id))
 
     def __len__(self):
-        """
-        Your code here
-        """
         return len(self.data)
 
     def __getitem__(self, idx):

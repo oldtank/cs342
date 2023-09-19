@@ -37,7 +37,7 @@ class SuperTuxDataset(Dataset):
         if color_aug:
             tf.append(transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.3))
             tf.append(transforms.RandomGrayscale(p=0.5))
-            tf.append(transforms.RandomErasing(p=0.5, scale=(0.1,0.2), ratio=(0.3,0.5)))
+            # tf.append(transforms.RandomErasing(p=0.5, scale=(0.1,0.2), ratio=(0.3,0.5)))
             
         tf.append(transforms.ToTensor())
         tf.append(transforms.Normalize(mean=[0.3234, 0.3310, 0.3444], std=[0.2524, 0.2219, 0.2470]))

@@ -29,7 +29,8 @@ def train(args):
     valid_data_loader = load_data('data/valid', batch_size=batch_size)
 
     # optimizer
-    optimizer = torch.optim.Adam(model.parameters())
+    # optimizer = torch.optim.Adam(model.parameters())
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=1e-4)
 
     global_step = 0
     for epoc in range(n_epochs):

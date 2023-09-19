@@ -24,12 +24,12 @@ class SuperTuxDataset(Dataset):
 
         #transforms to apply to the image
         tf = []
-        if resize is not None:
-            tf.append(transforms.Resize(resize))
+        # if resize is not None:
+        #     tf.append(transforms.Resize(resize))
 
-        if random_crop is not None:
-            # tf.append(transforms.Resize(resize))
-            tf.append(transforms.RandomCrop(random_crop))
+        # if random_crop is not None:
+        #     # tf.append(transforms.Resize(resize))
+        #     tf.append(transforms.RandomCrop(random_crop))
 
         if flip:
             tf.append(transforms.RandomHorizontalFlip())

@@ -35,7 +35,7 @@ class SuperTuxDataset(Dataset):
             tf.append(transforms.RandomHorizontalFlip())
 
         if color_aug:
-            tf.append(transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2))
+            tf.append(transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.3))
             tf.append(transforms.RandomGrayscale(p=0.5)) 
             
         tf.append(transforms.ToTensor())

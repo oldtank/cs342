@@ -25,7 +25,7 @@ def train(args):
     loss = torch.nn.CrossEntropyLoss()
 
     # data loader
-    train_data_loader = load_data('data/train', batch_size=batch_size, random_crop=(60,60), flip=True, color_aug=True)
+    train_data_loader = load_data('data/train', batch_size=batch_size, random_crop=(60,60), flip=True, color_aug=True, random_erase=True)
     valid_data_loader = load_data('data/valid', batch_size=batch_size, resize=(60,60))
 
     # optimizer

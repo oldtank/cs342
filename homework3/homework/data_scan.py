@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     dense_train_data = DenseSuperTuxDataset('dense_data/train')
     images = []
-    for data, label in train_data:
+    for data, label in dense_train_data:
         images.append(data[None, :])
     concat=torch.concat(images, dim=0)
     mean = torch.mean(concat, dim=[0,2,3])

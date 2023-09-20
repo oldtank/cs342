@@ -39,7 +39,7 @@ class SuperTuxDataset(Dataset):
             tf.append(transforms.RandomGrayscale(p=0.4)) 
             
         tf.append(transforms.ToTensor())
-        tf.append(transforms.Normalize(mean=[0.3234, 0.3310, 0.3444], std=[0.2524, 0.2219, 0.2470]))
+        # tf.append(transforms.Normalize(mean=[0.3234, 0.3310, 0.3444], std=[0.2524, 0.2219, 0.2470]))
         if random_erase:
             tf.append(transforms.RandomErasing(p=0.5, scale=(0.02,0.33), ratio=(0.3,3.3)))   
             

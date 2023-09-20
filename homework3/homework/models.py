@@ -1,5 +1,6 @@
 import torch
 import torch.nn.functional as F
+from torchvision import transforms
 
 
 class CNNClassifier(torch.nn.Module):
@@ -27,6 +28,7 @@ class CNNClassifier(torch.nn.Module):
 
     def __init__(self, layers=[32, 64, 128], n_input_channels=3):
         super().__init__()
+        self.normalize= transforms.Normalize(mean=[0.3234, 0.3310, 0.3444], std=[0.2524, 0.2219, 0.2470])
         L = [torch.nn.Conv2d(n_input_channels, 32, kernel_size=7, padding=3, stride=2),
              torch.nn.BatchNorm2d(32),
              torch.nn.ReLU()
@@ -39,6 +41,9 @@ class CNNClassifier(torch.nn.Module):
         self.classifier = torch.nn.Linear(in_features=c, out_features=6)
 
     def forward(self, x):
+        # normalize inputs
+        x = self.normalize(x)
+
         # Compute the features
         z = self.network(x)
         # Global average pooling
@@ -70,8 +75,8 @@ class FCN(torch.nn.Module):
                 identity = self.downsample(x)
             return self.net(x)+identity    
             
-    def __init__(self):
-        super().__init__(self, n_input_channels=3)
+    def __init__(self, n_input_channels=3):
+        super().__init__(self)
         """
         Your code here.
         Hint: The FCN can be a bit smaller the the CNNClassifier since you need to run it at a higher resolution
@@ -85,15 +90,15 @@ class FCN(torch.nn.Module):
         self.relu = torch.nn.ReLU()
 
         # blocks
-        self.block1 = Block(64, 128, stride=2)
-        self.block2 = Block(128, 256, stride=2)
+        self.block1 = self.Block(64, 128, stride=2)
+        self.block2 = self.Block(128, 256, stride=2)
 
         # up-convolutionn
         self.upconv1 = torch.nn.ConvTranspose2d(256, 128, kernel_size=3, stride=2, padding=1)
         self.upconv2 = torch.nn.ConvTranspose2d(128, 64, kernel_size=3, stride=2, padding=1)
 
         # final convo layer
-        self.output_layer = nn.Conv2d(64, 5, kernel_size=1)
+        self.output_layer = torch.nn.Conv2d(128, 5, kernel_size=1)
 
     def forward(self, x):
         """
@@ -121,7 +126,7 @@ class FCN(torch.nn.Module):
         x5 = self.upconv2(x4)
         x5 = torch.cat([x5, x1], dim=1)  # Concatenate skip connection
         
-
+        return self.output_layer(x5)
 
 model_factory = {
     'cnn': CNNClassifier,

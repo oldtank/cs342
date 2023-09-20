@@ -76,7 +76,7 @@ class FCN(torch.nn.Module):
             return self.net(x)+identity    
             
     def __init__(self, n_input_channels=3):
-        super().__init__(self)
+        super().__init__()
         """
         Your code here.
         Hint: The FCN can be a bit smaller the the CNNClassifier since you need to run it at a higher resolution
@@ -91,14 +91,16 @@ class FCN(torch.nn.Module):
 
         # blocks
         self.block1 = self.Block(64, 128, stride=2)
-        self.block2 = self.Block(128, 256, stride=2)
+        # self.block2 = self.Block(128, 256, stride=2)
 
         # up-convolutionn
-        self.upconv1 = torch.nn.ConvTranspose2d(256, 128, kernel_size=3, stride=2, padding=1)
-        self.upconv2 = torch.nn.ConvTranspose2d(128, 64, kernel_size=3, stride=2, padding=1)
+        # self.upconv1 = torch.nn.ConvTranspose2d(256, 128, kernel_size=3, stride=2, padding=1, output_padding=1)
+        self.upconv2 = torch.nn.ConvTranspose2d(128, 64, kernel_size=3, stride=2, padding=1, output_padding=1)
 
         # final convo layer
         self.output_layer = torch.nn.Conv2d(128, 5, kernel_size=1)
+
+        self.output_layer_no_stride = torch.nn.Conv2d(64, 5, kernel_size=1)
 
     def forward(self, x):
         """
@@ -110,23 +112,38 @@ class FCN(torch.nn.Module):
               if required (use z = z[:, :, :H, :W], where H and W are the height and width of a corresponding strided
               convolution
         """
+        # if input size is 1*1, do not need to do anything
+
          # through initial layer
+        # print('shape before initial layer: ' + repr(x.shape))
         x1 = self.conv1(x)
         x1 = self.relu(x1)
+        # print('shape after initial layer: ' + repr(x1.shape))
+
+        if x.size(2) == 1 or x.size(3) == 1:
+            return self.output_layer_no_stride(x1)
 
         # through blocks
         x2 = self.block1(x1)
-        x3 = self.block2(x2)
+        # print('shape after block1: ' + repr(x2.shape))
+        # x3 = self.block2(x2)
+        # print('shape after block2: ' + repr(x3.shape))
 
-        # up-connvo
-        x4 = self.upconv1(x3)
-        # skip connection
-        x4 = torch.cat([x4, x2], dim=1)  
+        # # up-connvo
+        # x4 = self.upconv1(x3)
+        # print('shape after upconvo1: ' + repr(x4.shape))
+        # # skip connection
+        # x4 = torch.cat([x4, x2], dim=1)
+        # print('shape after skip1: ' + repr(x4.shape))
         
-        x5 = self.upconv2(x4)
-        x5 = torch.cat([x5, x1], dim=1)  # Concatenate skip connection
-        
-        return self.output_layer(x5)
+        x3 = self.upconv2(x2)
+        # print('shape after upconvo2: ' + repr(x3.shape))
+        x3 = torch.cat([x3, x1], dim=1)  # Concatenate skip connection
+        # print('shape after skip2: ' + repr(x3.shape))
+
+        final_output = self.output_layer(x3)
+        # print('final output: ' + repr(final_output.shape))
+        return final_output
 
 model_factory = {
     'cnn': CNNClassifier,

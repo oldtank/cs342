@@ -100,7 +100,7 @@ def load_dense_data(dataset_path, num_workers=0, batch_size=32, flip=False, colo
         tf.append(dense_transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.3))
 
     if crop:
-        tf.append(dense_transforms.Resize((96*1.5, 128*1.5)))
+        tf.append(dense_transforms.Resize((144, 192)))
         tf.append(dense_transforms.RandomCrop((96, 128)))
 
     tf.append(dense_transforms.ToTensor())

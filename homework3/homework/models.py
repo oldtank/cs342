@@ -127,7 +127,7 @@ class FCN(torch.nn.Module):
             return self.output_layer_no_stride(x1)
 
         # normalize inputs
-        x = self.normalize(x)
+        x = self.normalize(x, [])
 
         # through blocks
         x2 = self.block1(x1)

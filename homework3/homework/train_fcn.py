@@ -11,11 +11,7 @@ def train(args):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
     from os import path
-    # model = FCN()
-    # if device is not None:
-    #     model = model.to(device)
-
-    model = load_model('fcn')
+    model = FCN()
     if device is not None:
         model = model.to(device)
 

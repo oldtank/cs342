@@ -89,19 +89,19 @@ class FCN(torch.nn.Module):
         self.normalize = dense_transforms.Normalize(mean=[0.2788, 0.2657, 0.2628], std=[0.2058, 0.1943, 0.2246])
 
         # Initial convolutional layer
-        self.conv1 = torch.nn.Conv2d(n_input_channels, 64, kernel_size=3, padding=1)
+        self.conv1 = torch.nn.Conv2d(n_input_channels, 20, kernel_size=3, padding=1)
         self.relu = torch.nn.ReLU()
 
         # blocks
-        self.block1 = self.Block(64, 128, stride=2)
-        # self.block2 = self.Block(128, 256, stride=2)
+        self.block1 = self.Block(20, 40, stride=2)
+        self.block2 = self.Block(40, 80, stride=2)
 
         # up-convolutionn
-        # self.upconv1 = torch.nn.ConvTranspose2d(256, 128, kernel_size=3, stride=2, padding=1, output_padding=1)
-        self.upconv2 = torch.nn.ConvTranspose2d(128, 64, kernel_size=3, stride=2, padding=1, output_padding=1)
+        self.upconv1 = torch.nn.ConvTranspose2d(80, 40, kernel_size=3, stride=2, padding=1, output_padding=1)
+        self.upconv2 = torch.nn.ConvTranspose2d(80, 40, kernel_size=3, stride=2, padding=1, output_padding=1)
 
         # final convo layer
-        self.output_layer = torch.nn.Conv2d(128, 5, kernel_size=1)
+        self.output_layer = torch.nn.Conv2d(60, 5, kernel_size=1)
 
         self.output_layer_no_stride = torch.nn.Conv2d(64, 5, kernel_size=1)
 
@@ -115,6 +115,10 @@ class FCN(torch.nn.Module):
               if required (use z = z[:, :, :H, :W], where H and W are the height and width of a corresponding strided
               convolution
         """
+
+        # normalize inputs
+        x, _ = self.normalize(x, [])
+
         # if input size is 1*1, do not need to do anything
 
          # through initial layer
@@ -126,28 +130,25 @@ class FCN(torch.nn.Module):
         if x.size(2) == 1 or x.size(3) == 1:
             return self.output_layer_no_stride(x1)
 
-        # normalize inputs
-        x = self.normalize(x, [])
-
         # through blocks
         x2 = self.block1(x1)
         # print('shape after block1: ' + repr(x2.shape))
-        # x3 = self.block2(x2)
+        x3 = self.block2(x2)
         # print('shape after block2: ' + repr(x3.shape))
 
         # # up-connvo
-        # x4 = self.upconv1(x3)
+        x4 = self.upconv1(x3)
         # print('shape after upconvo1: ' + repr(x4.shape))
         # # skip connection
-        # x4 = torch.cat([x4, x2], dim=1)
+        x4 = torch.cat([x4, x2], dim=1)
         # print('shape after skip1: ' + repr(x4.shape))
         
-        x3 = self.upconv2(x2)
-        # print('shape after upconvo2: ' + repr(x3.shape))
-        x3 = torch.cat([x3, x1], dim=1)  # Concatenate skip connection
-        # print('shape after skip2: ' + repr(x3.shape))
+        x5 = self.upconv2(x4)
+        # print('shape after upconvo2: ' + repr(x5.shape))
+        x5 = torch.cat([x5, x1], dim=1)  # Concatenate skip connection
+        # print('shape after skip2: ' + repr(x5.shape))
 
-        final_output = self.output_layer(x3)
+        final_output = self.output_layer(x5)
         # print('final output: ' + repr(final_output.shape))
         return final_output
 

@@ -90,8 +90,18 @@ def load_data(dataset_path, num_workers=0, batch_size=128, **kwargs):
     return DataLoader(dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True, drop_last=True)
 
 
-def load_dense_data(dataset_path, num_workers=0, batch_size=32, **kwargs):
-    dataset = DenseSuperTuxDataset(dataset_path, **kwargs)
+def load_dense_data(dataset_path, num_workers=0, batch_size=32, flip=False, color_aug=False, random_erase=False):
+    tf = []
+
+    if flip:
+        tf.append(dense_transforms.RandomHorizontalFlip())
+
+    if color_aug:
+        tf.append(dense_transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.3))
+
+    tf.append(dense_transforms.ToTensor())
+
+    dataset = DenseSuperTuxDataset(dataset_path, transform=dense_transforms.Compose(tf))
     return DataLoader(dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True, drop_last=True)
 
 

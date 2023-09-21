@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
-from torchvision import transforms
+from . import dense_transforms
+import dense_transforms
 
 
 class CNNClassifier(torch.nn.Module):
@@ -85,6 +86,8 @@ class FCN(torch.nn.Module):
         Hint: Use residual connections
         Hint: Always pad by kernel_size / 2, use an odd kernel_size
         """
+        self.normalize = dense_transforms.Normalize(mean=[0.2788, 0.2657, 0.2628], std=[0.2058, 0.1943, 0.2246])
+
         # Initial convolutional layer
         self.conv1 = torch.nn.Conv2d(n_input_channels, 64, kernel_size=3, padding=1)
         self.relu = torch.nn.ReLU()
@@ -122,6 +125,9 @@ class FCN(torch.nn.Module):
 
         if x.size(2) == 1 or x.size(3) == 1:
             return self.output_layer_no_stride(x1)
+
+        # normalize inputs
+        x = self.normalize(x)
 
         # through blocks
         x2 = self.block1(x1)

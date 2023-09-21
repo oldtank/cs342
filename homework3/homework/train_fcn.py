@@ -20,7 +20,7 @@ def train(args):
         train_logger = tb.SummaryWriter(path.join(args.log_dir, 'fcn-train'), flush_secs=1)
         valid_logger = tb.SummaryWriter(path.join(args.log_dir, 'fcn-valid'), flush_secs=1)
 
-    train_data_loader = load_dense_data('dense_data/train')
+    train_data_loader = load_dense_data('dense_data/train', flip=True, color_aug=True)
     valid_data_loader = load_dense_data('dense_data/valid')
 
     n_epochs = args.epoch

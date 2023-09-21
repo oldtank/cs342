@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 from . import dense_transforms
-import dense_transforms
+from . import dense_transforms
 
 
 class CNNClassifier(torch.nn.Module):

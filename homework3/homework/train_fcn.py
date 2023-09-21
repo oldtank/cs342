@@ -38,6 +38,7 @@ def train(args):
             if device is not None:
                 batch_data, batch_label = batch_data.to(device), batch_label.to(device)
             output = model(batch_data)
+
             loss_val = loss(torch.softmax(output, dim=1).permute(0, 2, 3, 1).contiguous().view(-1, 5),
                             batch_label.view(-1))
             matrix.add(output.argmax(dim=1), batch_label)
@@ -69,7 +70,7 @@ def train(args):
             epoc, matrix.global_accuracy, matrix.iou, val_matrix.global_accuracy, val_matrix.iou))
 
         train_logger.add_scalar('lr', optimizer.param_groups[0]['lr'], global_step=global_step)
-        scheduler.step(np.mean(val_matrix.iou))
+        scheduler.step(val_matrix.iou)
     """
     Your code here, modify your HW1 / HW2 code
     Hint: Use ConfusionMatrix, ConfusionMatrix.add(logit.argmax(1), label), ConfusionMatrix.iou to compute

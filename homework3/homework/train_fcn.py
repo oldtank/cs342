@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 
-from .models import FCN, save_model
+from .models import FCN, save_model, load_model
 from .utils import load_dense_data, DENSE_CLASS_DISTRIBUTION, ConfusionMatrix
 from . import dense_transforms
 import torch.utils.tensorboard as tb
@@ -11,7 +11,11 @@ def train(args):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
     from os import path
-    model = FCN()
+    # model = FCN()
+    # if device is not None:
+    #     model = model.to(device)
+
+    model = load_model('fcn')
     if device is not None:
         model = model.to(device)
 

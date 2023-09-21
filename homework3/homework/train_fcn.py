@@ -28,6 +28,7 @@ def train(args):
 
     loss = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters())
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', patience=10)
 
     global_step = 0
     for epoc in range(n_epochs):
@@ -67,6 +68,8 @@ def train(args):
         print('epoch = % 3d   train accuracy = %0.3f   train_iou = %0.3f   valid accuracy = %0.3f   valid iou = %0.3f' % (
             epoc, matrix.global_accuracy, matrix.iou, val_matrix.global_accuracy, val_matrix.iou))
 
+        train_logger.add_scalar('lr', optimizer.param_groups[0]['lr'], global_step=global_step)
+        scheduler.step(np.mean(val_matrix.iou))
     """
     Your code here, modify your HW1 / HW2 code
     Hint: Use ConfusionMatrix, ConfusionMatrix.add(logit.argmax(1), label), ConfusionMatrix.iou to compute

@@ -90,7 +90,7 @@ def load_data(dataset_path, num_workers=0, batch_size=128, **kwargs):
     return DataLoader(dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True, drop_last=True)
 
 
-def load_dense_data(dataset_path, num_workers=0, batch_size=32, flip=False, color_aug=False, random_erase=False):
+def load_dense_data(dataset_path, num_workers=0, batch_size=32, flip=False, color_aug=False, crop=False):
     tf = []
 
     if flip:
@@ -98,6 +98,10 @@ def load_dense_data(dataset_path, num_workers=0, batch_size=32, flip=False, colo
 
     if color_aug:
         tf.append(dense_transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.3))
+
+    if crop:
+        tf.append(dense_transforms.Resize((96*1.5, 128*1.5)))
+        tf.append(dense_transforms.RandomCrop((96, 128)))
 
     tf.append(dense_transforms.ToTensor())
 

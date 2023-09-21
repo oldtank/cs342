@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 from . import dense_transforms
-from . import dense_transforms
+from torchvision import transforms
 
 
 class CNNClassifier(torch.nn.Module):
@@ -29,7 +29,7 @@ class CNNClassifier(torch.nn.Module):
 
     def __init__(self, layers=[32, 64, 128], n_input_channels=3):
         super().__init__()
-        self.normalize= transforms.Normalize(mean=[0.3234, 0.3310, 0.3444], std=[0.2524, 0.2219, 0.2470])
+        self.normalize = transforms.Normalize(mean=[0.3234, 0.3310, 0.3444], std=[0.2524, 0.2219, 0.2470])
         L = [torch.nn.Conv2d(n_input_channels, 32, kernel_size=7, padding=3, stride=2),
              torch.nn.BatchNorm2d(32),
              torch.nn.ReLU()
@@ -96,6 +96,9 @@ class FCN(torch.nn.Module):
         self.block1 = self.Block(20, 40, stride=2)
         self.block2 = self.Block(40, 80, stride=2)
 
+        # up-convo if input goes through one block
+        self.upconv3 = torch.nn.ConvTranspose2d(40, 20, kernel_size=3, stride=2, padding=1, output_padding=1)
+
         # up-convolutionn
         self.upconv1 = torch.nn.ConvTranspose2d(80, 40, kernel_size=3, stride=2, padding=1, output_padding=1)
         self.upconv2 = torch.nn.ConvTranspose2d(80, 40, kernel_size=3, stride=2, padding=1, output_padding=1)
@@ -103,7 +106,9 @@ class FCN(torch.nn.Module):
         # final convo layer
         self.output_layer = torch.nn.Conv2d(60, 5, kernel_size=1)
 
-        self.output_layer_no_stride = torch.nn.Conv2d(64, 5, kernel_size=1)
+        self.output_layer_no_stride = torch.nn.Conv2d(20, 5, kernel_size=1)
+        self.output_layer_one_stride = torch.nn.Conv2d(40, 5, kernel_size=1)
+
 
     def forward(self, x):
         """
@@ -119,9 +124,8 @@ class FCN(torch.nn.Module):
         # normalize inputs
         x, _ = self.normalize(x, [])
 
-        # if input size is 1*1, do not need to do anything
 
-         # through initial layer
+        # through initial layer
         # print('shape before initial layer: ' + repr(x.shape))
         x1 = self.conv1(x)
         x1 = self.relu(x1)
@@ -129,6 +133,9 @@ class FCN(torch.nn.Module):
 
         if x.size(2) == 1 or x.size(3) == 1:
             return self.output_layer_no_stride(x1)
+
+        if x.size(2) ==2 or x.size(3) == 2:
+            return self.output_layer_no_stride(self.upconv3(self.block1(x1)))
 
         # through blocks
         x2 = self.block1(x1)

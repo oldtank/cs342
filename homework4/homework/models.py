@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 from . import dense_transforms
 from torchvision import transforms as T
+from torchvision.transforms import functional as TVF
 
 
 def extract_peak(heatmap, max_pool_ks=7, min_score=-5, max_det=100):
@@ -116,7 +117,17 @@ class Detector(torch.nn.Module):
                  scalar. Otherwise pytorch might keep a computation graph in the background and your program will run
                  out of memory.
         """
-        raise NotImplementedError('Detector.detect')
+        image_reshape = image.unsqueeze(0)
+        heatmap = self.forward((image_reshape))
+
+        peaks=[]
+        for i in range(3):
+            peaks_one_class = []
+            for detection, cx, cy in extract_peak(heatmap=heatmap[0][i], max_det=30):
+                peaks_one_class.append((detection.item(), cx, cy, 0, 0))
+            peaks.append(peaks_one_class)
+
+        return peaks
 
 
 def save_model(model):

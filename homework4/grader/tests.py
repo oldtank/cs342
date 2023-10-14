@@ -205,42 +205,42 @@ class DetectionGrader(Grader):
     def test_box_ap0(self, min_val=0.5, max_val=0.75):
         """Average precision (inside box c=0)"""
         ap = self.pr_box[0].average_prec
-        print(ap)
+        print('%0.3f 0.5 to 0.75' % ap)
         return max(min(ap, max_val) - min_val, 0) / (max_val - min_val), 'AP = %0.3f' % ap
 
     @Case(score=10)
     def test_box_ap1(self, min_val=0.25, max_val=0.45):
         """Average precision (inside box c=1)"""
         ap = self.pr_box[1].average_prec
-        print(ap)
+        print('%0.3f 0.25 to 0.45' % ap)
         return max(min(ap, max_val) - min_val, 0) / (max_val - min_val), 'AP = %0.3f' % ap
 
     @Case(score=10)
     def test_box_ap2(self, min_val=0.6, max_val=0.85):
         """Average precision (inside box c=2)"""
         ap = self.pr_box[2].average_prec
-        print(ap)
+        print('%0.3f 0.6 to 0.85' % ap)
         return max(min(ap, max_val) - min_val, 0) / (max_val - min_val), 'AP = %0.3f' % ap
 
     @Case(score=15)
     def test_dist_ap0(self, min_val=0.5, max_val=0.72):
         """Average precision (distance c=0)"""
         ap = self.pr_dist[0].average_prec
-        print(ap)
+        print('%0.3f 0.5 to 0.72' % ap)
         return max(min(ap, max_val) - min_val, 0) / (max_val - min_val), 'AP = %0.3f' % ap
 
     @Case(score=15)
     def test_dist_ap1(self, min_val=0.25, max_val=0.45):
         """Average precision (distance c=1)"""
         ap = self.pr_dist[1].average_prec
-        print(ap)
+        print('%0.3f 0.25 to 0.45' % ap)
         return max(min(ap, max_val) - min_val, 0) / (max_val - min_val), 'AP = %0.3f' % ap
 
     @Case(score=15)
     def test_dist_ap2(self, min_val=0.6, max_val=0.85):
         """Average precision (distance c=2)"""
         ap = self.pr_dist[2].average_prec
-        print(ap)
+        print('%0.3f 0.6 to 0.85' % ap)
         return max(min(ap, max_val) - min_val, 0) / (max_val - min_val), 'AP = %0.3f' % ap
 
     @Case(score=3, extra_credit=True)

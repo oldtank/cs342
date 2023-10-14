@@ -12,6 +12,9 @@ def train(args):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
     model = Detector().to(device)
+    if args.continue_training:
+        model.load_state_dict(torch.load(path.join(path.dirname(path.abspath(__file__)), 'det.th')))
+
     train_logger, valid_logger = None, None
     if args.log_dir is not None:
         train_logger = tb.SummaryWriter(path.join(args.log_dir, 'train'), flush_secs=1)
@@ -108,5 +111,7 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--epoch', default=100, type=int)
     parser.add_argument('-t', '--transform',
                         default='Compose([ColorJitter(0.9, 0.9, 0.9, 0.1), RandomHorizontalFlip(), ToTensor(), ToHeatmap()])')
+    parser.add_argument('-c', '--continue_training', default=False)
+
     args = parser.parse_args()
     train(args)

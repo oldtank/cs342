@@ -1,7 +1,7 @@
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 from . import dense_transforms
-
+import torch
 
 class DetectionSuperTuxDataset(Dataset):
     def __init__(self, dataset_path, transform=dense_transforms.ToTensor(), min_size=20):
@@ -35,6 +35,11 @@ class DetectionSuperTuxDataset(Dataset):
 def load_detection_data(dataset_path, num_workers=0, batch_size=32, **kwargs):
     dataset = DetectionSuperTuxDataset(dataset_path, **kwargs)
     return DataLoader(dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True, drop_last=True)
+
+
+def accuracy(outputs, labels):
+    outputs_idx = torch.where(outputs >=0, torch.ones_like(outputs), torch.zeros_like(outputs))
+    return outputs_idx.eq(labels).float().mean()
 
 
 if __name__ == '__main__':

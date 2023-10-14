@@ -1,5 +1,7 @@
 import torch
 import torch.nn.functional as F
+from . import dense_transforms
+from torchvision import transforms as T
 
 
 def extract_peak(heatmap, max_pool_ks=7, min_score=-5, max_det=100):
@@ -12,25 +14,94 @@ def extract_peak(heatmap, max_pool_ks=7, min_score=-5, max_det=100):
        @return: List of peaks [(score, cx, cy), ...], where cx, cy are the position of a peak and score is the
                 heatmap value at the peak. Return no more than max_det peaks per image
     """
-    raise NotImplementedError('extract_peak')
+    heatmap_formatted = heatmap[None, None]
+    max_pool = F.max_pool2d(input=heatmap_formatted, kernel_size=max_pool_ks, stride=1, padding=max_pool_ks//2, return_indices=False)
 
+    maxima_mask = (max_pool == heatmap_formatted)
+    maxima_mask = maxima_mask & (heatmap_formatted > min_score)
+
+    # find indices
+    indices = torch.nonzero(maxima_mask, as_tuple=False)
+
+    maxima_values = heatmap_formatted[maxima_mask]
+    topk_values, topk_indices = torch.topk(maxima_values, min(indices.shape[0], max_det))
+
+    # removes the added two empty columns; and reverse the remaining two columns
+    top_indices = indices[topk_indices][:,2:][:, [1, 0]]
+
+    indices_list = top_indices.tolist()
+    result = []
+    for index in indices_list:
+        result.append((heatmap[index[1]][index[0]], index[0], index[1]))
+    return result
 
 class Detector(torch.nn.Module):
-    def __init__(self):
+    class Block(torch.nn.Module):
+        def __init__(self, n_input, n_output):
+            super().__init__()
+            self.net = torch.nn.Sequential(
+                torch.nn.Conv2d(n_input, n_output, kernel_size=3, padding=1, stride=2),
+                torch.nn.BatchNorm2d(n_output),
+                torch.nn.ReLU(),
+                torch.nn.Conv2d(n_output, n_output, kernel_size=3, padding=1),
+                torch.nn.BatchNorm2d(n_output),
+                torch.nn.ReLU(),
+                torch.nn.Conv2d(n_output, n_output, kernel_size=3, padding=1),
+                torch.nn.BatchNorm2d(n_output),
+                torch.nn.ReLU()
+            )
+
+            self.skip = torch.nn.Conv2d(in_channels=n_input, out_channels=n_output, kernel_size=1, stride=2)
+
+        def forward(self, x):
+            return self.net(x) + self.skip(x)
+
+    class UpBlock(torch.nn.Module):
+        def __init__(self, n_input, n_output):
+            super().__init__()
+            self.c1 = torch.nn.ConvTranspose2d(n_input, n_output, kernel_size=3, padding=1, stride=2, output_padding=1)
+
+        def forward(self, x):
+            return F.relu(self.c1(x))
+
+    def __init__(self, layers=[16, 32, 64, 128], n_output_channel=3):
         """
            Your code here.
            Setup your detection network
         """
         super().__init__()
-        raise NotImplementedError('Detector.__init__')
+        self.normalize = T.Normalize(mean=[0.2788, 0.2657, 0.2628], std=[0.2058, 0.1943, 0.2246])
+
+        self.n_conv = len(layers)
+        skip_layer_size = [3] + layers[:-1]
+
+        c=3
+        for i, l in enumerate(layers):
+            self.add_module('conv%d' % i, self.Block(c, l))
+            c = l
+
+        for i, l in list(enumerate(layers))[::-1]:
+            self.add_module('upconv%d' % i, self.UpBlock(c, l))
+            c = l
+            c += skip_layer_size[i]
+
+        self.classifier = torch.nn.Conv2d(c, n_output_channel, 1)
 
     def forward(self, x):
-        """
-           Your code here.
-           Implement a forward pass through the network, use forward for training,
-           and detect for detection
-        """
-        raise NotImplementedError('Detector.forward')
+        z = self.normalize(x)
+        up_activation = []
+        for i in range(self.n_conv):
+            # Add all the information required for skip connections
+            up_activation.append(z)
+            z = self._modules['conv%d'%i](z)
+
+        for i in reversed(range(self.n_conv)):
+            z = self._modules['upconv%d'%i](z)
+            # Fix the padding
+            z = z[:, :, :up_activation[i].size(2), :up_activation[i].size(3)]
+            # Add the skip connection
+            z = torch.cat([z, up_activation[i]], dim=1)
+        return self.classifier(z)
 
     def detect(self, image):
         """

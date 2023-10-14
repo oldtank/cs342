@@ -24,3 +24,8 @@ if __name__ == '__main__':
     print("std:  " + repr(std))
     print('ones: % 3d' % ones)
     print('zeros: % 3d' % zeros)
+
+    # mean: tensor([0.2788, 0.2657, 0.2628])
+    # std: tensor([0.2058, 0.1943, 0.2246])
+    # ones: 7948
+    # zeros: 334589755

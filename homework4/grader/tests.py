@@ -104,6 +104,7 @@ class ExtractPeakGrader(Grader):
         """return value"""
         ep = self.module.extract_peak
         for i in range(50, 200, 10):
+            # print(i)
             img = torch.randn(3 * i, 2 * i)
             p = ep(img, max_pool_ks=3, min_score=min_score, max_det=i)
             assert len(p) <= i, "Expected at most %d peaks, got %d" % (i, len(p))
@@ -121,8 +122,8 @@ class ExtractPeakGrader(Grader):
         p = self.module.extract_peak(img, max_pool_ks=1, min_score=-1e5, max_det=100000)
         assert len(p) == (img > -1e5).sum(), 'Expected exactly %d detections, got %d' % ((img > -1e5).sum(), len(p))
         self.test_det(p, img, min_score=-1e5)
-        
-        import numpy as np 
+
+        import numpy as np
         min_s = img.min()
         max_s = img.max()
         for _min_score in np.linspace(min_s, max_s, 5):
@@ -204,52 +205,61 @@ class DetectionGrader(Grader):
     def test_box_ap0(self, min_val=0.5, max_val=0.75):
         """Average precision (inside box c=0)"""
         ap = self.pr_box[0].average_prec
+        print(ap)
         return max(min(ap, max_val) - min_val, 0) / (max_val - min_val), 'AP = %0.3f' % ap
 
     @Case(score=10)
     def test_box_ap1(self, min_val=0.25, max_val=0.45):
         """Average precision (inside box c=1)"""
         ap = self.pr_box[1].average_prec
+        print(ap)
         return max(min(ap, max_val) - min_val, 0) / (max_val - min_val), 'AP = %0.3f' % ap
 
     @Case(score=10)
     def test_box_ap2(self, min_val=0.6, max_val=0.85):
         """Average precision (inside box c=2)"""
         ap = self.pr_box[2].average_prec
+        print(ap)
         return max(min(ap, max_val) - min_val, 0) / (max_val - min_val), 'AP = %0.3f' % ap
 
     @Case(score=15)
     def test_dist_ap0(self, min_val=0.5, max_val=0.72):
         """Average precision (distance c=0)"""
         ap = self.pr_dist[0].average_prec
+        print(ap)
         return max(min(ap, max_val) - min_val, 0) / (max_val - min_val), 'AP = %0.3f' % ap
 
     @Case(score=15)
     def test_dist_ap1(self, min_val=0.25, max_val=0.45):
         """Average precision (distance c=1)"""
         ap = self.pr_dist[1].average_prec
+        print(ap)
         return max(min(ap, max_val) - min_val, 0) / (max_val - min_val), 'AP = %0.3f' % ap
 
     @Case(score=15)
     def test_dist_ap2(self, min_val=0.6, max_val=0.85):
         """Average precision (distance c=2)"""
         ap = self.pr_dist[2].average_prec
+        print(ap)
         return max(min(ap, max_val) - min_val, 0) / (max_val - min_val), 'AP = %0.3f' % ap
 
     @Case(score=3, extra_credit=True)
     def test_iou_ap0(self, min_val=0.5):
         """Average precision (iou > 0.5  c=0) [extra credit]"""
         ap = self.pr_iou[0].average_prec
+        print(ap)
         return ap >= min_val, 'AP = %0.3f' % ap
 
     @Case(score=3, extra_credit=True)
     def test_iou_ap1(self, min_val=0.3):
         """Average precision (iou > 0.5  c=1) [extra credit]"""
         ap = self.pr_iou[1].average_prec
+        print(ap)
         return ap >= min_val, 'AP = %0.3f' % ap
 
     @Case(score=3, extra_credit=True)
     def test_iou_ap2(self, min_val=0.6):
         """Average precision (iou > 0.5  c=2) [extra credit]"""
         ap = self.pr_iou[2].average_prec
+        print(ap)
         return ap >= min_val, 'AP = %0.3f' % ap

@@ -28,6 +28,7 @@ def train(args):
     import inspect
     transform = eval(args.transform, {k: v for k, v in inspect.getmembers(dense_transforms) if inspect.isclass(v)})
     train_data = load_detection_data('dense_data/train', num_workers=4,
+                                     batch_size=128,
                                      transform=dense_transforms.Compose([
                                          dense_transforms.ColorJitter(0.9, 0.9, 0.9, 0.1),
                                          dense_transforms.RandomHorizontalFlip(),
@@ -35,13 +36,14 @@ def train(args):
                                          dense_transforms.ToHeatmap()
                                      ]))
     valid_data = load_detection_data('dense_data/valid', num_workers=4,
+                                     batch_size=128,
                                      transform=dense_transforms.Compose([
                                          dense_transforms.ToTensor(),
                                          dense_transforms.ToHeatmap()]))
 
     global_step = 0
     for epoch in range(args.epoch):
-        print('String epoch % 3d' % epoch)
+        print('Starting epoch % 3d' % epoch)
         model.train()
         accuracies = []
         for img, peak, size in train_data:

@@ -247,19 +247,19 @@ class DetectionGrader(Grader):
     def test_iou_ap0(self, min_val=0.5):
         """Average precision (iou > 0.5  c=0) [extra credit]"""
         ap = self.pr_iou[0].average_prec
-        print(ap)
+        print('%0.3f min 0.5' % ap)
         return ap >= min_val, 'AP = %0.3f' % ap
 
     @Case(score=3, extra_credit=True)
     def test_iou_ap1(self, min_val=0.3):
         """Average precision (iou > 0.5  c=1) [extra credit]"""
         ap = self.pr_iou[1].average_prec
-        print(ap)
+        print('%0.3f min 0.3' % ap)
         return ap >= min_val, 'AP = %0.3f' % ap
 
     @Case(score=3, extra_credit=True)
     def test_iou_ap2(self, min_val=0.6):
         """Average precision (iou > 0.5  c=2) [extra credit]"""
         ap = self.pr_iou[2].average_prec
-        print(ap)
+        print('%0.3f min 0.6' % ap)
         return ap >= min_val, 'AP = %0.3f' % ap

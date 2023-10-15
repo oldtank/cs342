@@ -26,7 +26,8 @@ def train(args):
     """
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
     weights=torch.tensor([26787764/631])
-    loss = torch.nn.BCEWithLogitsLoss(pos_weight=torch.as_tensor(334589755/7948,dtype=torch.float)).to(device)
+    peak_loss = torch.nn.BCEWithLogitsLoss(pos_weight=torch.as_tensor(334589755/7948,dtype=torch.float)).to(device)
+    size_loss = torch.nn.MSELoss().to(device)
 
     import inspect
     transform = eval(args.transform, {k: v for k, v in inspect.getmembers(dense_transforms) if inspect.isclass(v)})
@@ -51,19 +52,32 @@ def train(args):
         accuracies = []
         for img, peak, size in train_data:
             img, peak, size = img.to(device), peak.to(device), size.to(device)
+
             output = model(img)
-            loss_val = loss(output.view(-1), peak.view(-1))
+
+            # first 3 channels are heatmap
+            output_hm=output[:, :3, :, :]
+
+            # last 3 channels are sizes
+            output_size = output[:, 3:, :, :]
+
+            peak_loss_val = peak_loss(output_hm.contiguous().view(-1), peak.view(-1))
+            size_center_only = output_size
+            size_center_only[size==0]=0
+            size_loss_val = size_loss(size_center_only.contiguous().view(-1), size.view(-1))
+            total_loss = 0.8*peak_loss_val + 0.2*size_loss_val
 
             if train_logger is not None:
-                train_logger.add_scalar('loss', loss_val, global_step)
-                train_logger.add_scalar('accuracy', accuracy(output, peak).detach().cpu().item())
+                train_logger.add_scalar('peak loss', peak_loss_val, global_step)
+                train_logger.add_scalar('size loss', size_loss_val, global_step)
+                train_logger.add_scalar('accuracy', accuracy(output_hm, peak).detach().cpu().item())
 
             if train_logger is not None and global_step %100 ==0:
-                log(train_logger, img, peak, output, global_step)
+                log(train_logger, img, peak, output_hm, global_step)
 
-            accuracies.append(accuracy(output, peak).detach().cpu().item())
+            accuracies.append(accuracy(output_hm, peak).detach().cpu().item())
             optimizer.zero_grad()
-            loss_val.backward()
+            total_loss.backward()
             optimizer.step()
             global_step+=1
 
@@ -77,8 +91,9 @@ def train(args):
             val_peak=peak
             img, peak, size = img.to(device), peak.to(device), size.to(device)
             output = model(img)
-            val_accuracies.append(accuracy(output, peak).detach().cpu().item())
-            val_output = output.detach().cpu()
+            output_hm = output[:, :3, :, :]
+            val_accuracies.append(accuracy(output_hm, peak).detach().cpu().item())
+            val_output = output_hm.detach().cpu()
         valid_logger.add_scalar('accuracy', np.mean(val_accuracies), global_step=global_step)
         if valid_logger is not None and global_step % 100 == 0:
             log(valid_logger, val_img, val_peak, val_output, global_step)

@@ -66,7 +66,7 @@ def train(args):
 
             size_center_only[size==0]=0
             size_loss_val = size_loss(size_center_only.contiguous().view(-1), size.view(-1))
-            total_loss = 0.3*peak_loss_val + 0.7*size_loss_val
+            total_loss = 0.5*peak_loss_val + 0.5*size_loss_val
 
             if train_logger is not None:
                 train_logger.add_scalar('peak loss', peak_loss_val, global_step)

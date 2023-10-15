@@ -24,7 +24,7 @@ def train(args):
     Your code here, modify your HW3 code
     Hint: Use the log function below to debug and visualize your model
     """
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-5, weight_decay=1e-5)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, weight_decay=1e-5)
     weights=torch.tensor([26787764/631])
     peak_loss = torch.nn.BCEWithLogitsLoss(pos_weight=torch.as_tensor(334589755/7948,dtype=torch.float)).to(device)
     size_loss = torch.nn.MSELoss().to(device)

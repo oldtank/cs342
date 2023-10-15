@@ -65,7 +65,7 @@ class Detector(torch.nn.Module):
         def forward(self, x):
             return F.relu(self.c1(x))
 
-    def __init__(self, layers=[16, 32, 64, 128], n_output_channel=3):
+    def __init__(self, layers=[16, 32, 64, 128], n_output_channel=5):
         """
            Your code here.
            Setup your detection network
@@ -118,13 +118,14 @@ class Detector(torch.nn.Module):
                  out of memory.
         """
         image_reshape = image.unsqueeze(0)
-        heatmap = self.forward((image_reshape))
+        output = self.forward((image_reshape))
 
         peaks=[]
         for i in range(3):
             peaks_one_class = []
-            for detection, cx, cy in extract_peak(heatmap=heatmap[0][i], max_det=30):
-                peaks_one_class.append((detection.item(), cx, cy, 0, 0))
+            curr_heatmap = output[0][i]
+            for detection, cx, cy in extract_peak(heatmap=curr_heatmap, max_det=30):
+                peaks_one_class.append((detection.item(), cx, cy, output[0][3][cy][cx], output[0][4][cy][cx]))
             peaks.append(peaks_one_class)
 
         return peaks

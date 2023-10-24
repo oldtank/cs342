@@ -69,7 +69,7 @@ class PyTux:
         p = proj @ view @ np.array(list(x) + [1])
         return np.clip(np.array([p[0] / p[-1], -p[1] / p[-1]]), -1, 1)
 
-    def rollout(self, track, controller, planner=None, max_frames=1000, verbose=False, data_callback=None):
+  def rollout(self, track, controller, planner=None, max_frames=1000, verbose=False, data_callback=None):
         """
         Play a level (track) for a single round.
         :param track: Name of the track
@@ -81,8 +81,9 @@ class PyTux:
                               data
         :return: Number of steps played
         """
+
         import io
-        
+
         if self.k is not None and self.k.config.track == track:
             self.k.restart()
             self.k.step()
@@ -103,6 +104,7 @@ class PyTux:
         last_rescue = 0
 
         if verbose:
+            import matplotlib.pyplot as plt
             fig, ax = plt.subplots(1, 1)
 
         frames = []
@@ -160,11 +162,13 @@ class PyTux:
 
             self.k.step(action)
             t += 1
+
         if verbose:
             import imageio
+
             imageio.mimwrite("test.mp4", frames, fps=30, bitrate=1000000)
         return t, kart.overall_distance / track.length
-
+      
     def close(self):
         """
         Call this function, once you're done with PyTux

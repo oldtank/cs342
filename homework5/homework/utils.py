@@ -44,15 +44,13 @@ class PyTux:
     _singleton = None
 
     def __init__(self, screen_width=128, screen_height=96):
-        # PyTux._singleton = None
-        # if PyTux._singleton is None:
-        #     # assert PyTux._singleton is None, "Cannot create more than one pytux object"
-        #     PyTux._singleton = self
-        #     self.config = pystk.GraphicsConfig.hd()
-        #     self.config.screen_width = screen_width
-        #     self.config.screen_height = screen_height
-        #     pystk.init(self.config)
-        #     self.k = None
+        assert PyTux._singleton is None, "Cannot create more than one pytux object"
+        PyTux._singleton = self
+        self.config = pystk.GraphicsConfig.hd()
+        self.config.screen_width = screen_width
+        self.config.screen_height = screen_height
+        pystk.init(self.config)
+        self.k = None
 
     @staticmethod
     def _point_on_track(distance, track, offset=0.0):

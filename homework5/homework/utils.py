@@ -4,6 +4,7 @@ import pystk
 from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms.functional as TF
 from . import dense_transforms
+import matplotlib.pyplot as plt
 
 RESCUE_TIMEOUT = 30
 TRACK_OFFSET = 15
@@ -98,9 +99,9 @@ class PyTux:
         last_rescue = 0
 
         if verbose:
-            import matplotlib.pyplot as plt
             fig, ax = plt.subplots(1, 1)
-
+        plt.show()
+        
         for t in range(max_frames):
 
             state.update()

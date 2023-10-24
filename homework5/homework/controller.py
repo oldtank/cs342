@@ -12,7 +12,8 @@ def control(aim_point, current_vel):
     target_velocity = 30
 
     if current_vel < target_velocity:
-        action.acceleration = (target_velocity - current_vel) / target_velocity
+        if aim_point[0] < 0.2 or aim_point[0] > -0.2:
+            action.acceleration = (target_velocity - current_vel) / target_velocity
     elif current_vel > target_velocity:
         action.brake = True
 

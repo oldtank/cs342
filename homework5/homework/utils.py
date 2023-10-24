@@ -69,7 +69,7 @@ class PyTux:
         p = proj @ view @ np.array(list(x) + [1])
         return np.clip(np.array([p[0] / p[-1], -p[1] / p[-1]]), -1, 1)
 
-  def rollout(self, track, controller, planner=None, max_frames=1000, verbose=False, data_callback=None):
+    def rollout(self, track, controller, planner=None, max_frames=1000, verbose=False, data_callback=None):
         """
         Play a level (track) for a single round.
         :param track: Name of the track

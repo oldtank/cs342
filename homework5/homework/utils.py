@@ -103,7 +103,6 @@ class PyTux:
 
         if verbose:
             fig, ax = plt.subplots(1, 1)
-        plt.show()
         for t in range(max_frames):
 
             state.update()
@@ -148,7 +147,7 @@ class PyTux:
 
             self.k.step(action)
             t += 1
-        plt.show()
+        plt.savefig('test.png')
         return t, kart.overall_distance / track.length
 
     def close(self):

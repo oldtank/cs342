@@ -9,7 +9,7 @@ def control(aim_point, current_vel):
     :return: a pystk.Action (set acceleration, brake, steer, drift)
     """
     action = pystk.Action()
-    target_velocity = 30
+    target_velocity = 36
 
     if current_vel < target_velocity:
         if aim_point[0] < 0.2 or aim_point[0] > -0.2:

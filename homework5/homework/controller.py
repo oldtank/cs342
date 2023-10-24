@@ -15,21 +15,37 @@ def control(aim_point, current_vel):
         if aim_point[0] < 0.2 or aim_point[0] > -0.2:
             action.acceleration = (target_velocity - current_vel) / target_velocity
     
-    if current_vel > target_velocity or aim_point[0] > 0.8 or aim_point[0] < -0.8:
+    if current_vel > target_velocity:
         action.brake = True
 
-    if aim_point[0] < 0:
-        if aim_point[0] > -0.25:
-            action.steer = 4*aim_point[0]
-        else:
-            action.steer = -1
-    elif aim_point[0] > 0:
-        if aim_point[0] > 0.25:
-            action.steer = 4*aim_point[0]
-        else:
-            action.steer = 1
-    if aim_point[0] > 0.25 or aim_point[0] < -0.25:
+    steer_sign = 0
+    if aim_point[0]>0:
+        steer_sign = 1
+    elif aim_point[0] < 0:
+        steer_sign = -1
+
+    steer_magnitude = 0
+    if aim_point[1] == 0:
+        steer_magnitude=9999
+    else:
+        steer_magnitude=abs(aim_point[0]/aim_point[1])
+
+    action.steer = steer_sign * min(steer_magnitude, 1)
+    if steer_magnitude > 2:
         action.drift = True
+    
+    # if aim_point[0] < 0:
+    #     if aim_point[0] > -0.25:
+    #         action.steer = 4*aim_point[0]
+    #     else:
+    #         action.steer = -1
+    # elif aim_point[0] > 0:
+    #     if aim_point[0] > 0.25:
+    #         action.steer = 4*aim_point[0]
+    #     else:
+    #         action.steer = 1
+    # if aim_point[0] > 0.25 or aim_point[0] < -0.25:
+    #     action.drift = True
 
     """
     Your code here

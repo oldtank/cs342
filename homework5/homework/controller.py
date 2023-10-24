@@ -11,10 +11,6 @@ def control(aim_point, current_vel):
     action = pystk.Action()
     target_velocity = 36
 
-    if current_vel < target_velocity:
-        if aim_point[0] < 0.2 or aim_point[0] > -0.2:
-            action.acceleration = (target_velocity - current_vel) / target_velocity
-    
     if current_vel > target_velocity:
         action.brake = True
 
@@ -24,11 +20,16 @@ def control(aim_point, current_vel):
     elif aim_point[0] < 0:
         steer_sign = -1
 
-    steer_magnitude = 0
+    steer_magnitude = 0.
     if aim_point[1] == 0:
-        steer_magnitude=9999
+        steer_magnitude=9999.
     else:
         steer_magnitude=abs(aim_point[0]/aim_point[1])
+
+    if current_vel < target_velocity:
+        if steer_magnitude < 1.:
+            action.acceleration = (target_velocity - current_vel) / target_velocity
+    
 
     action.steer = steer_sign * min(steer_magnitude, 1)
     if steer_magnitude > 2:

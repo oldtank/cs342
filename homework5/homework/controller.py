@@ -19,12 +19,12 @@ def control(aim_point, current_vel):
 
     if aim_point[0] < 0:
         if aim_point[0] > -0.3:
-            action.steer = 3*aim_point[0]
+            action.steer = 3.3*aim_point[0]
         else:
             action.steer = -1
     elif aim_point[0] > 0:
         if aim_point[0] > 0.3:
-            action.steer = 3*aim_point[0]
+            action.steer = 3.3*aim_point[0]
         else:
             action.steer = 1
     if aim_point[0] > 0.8 or aim_point[0] < -0.8:

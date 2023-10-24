@@ -6,7 +6,6 @@ import torchvision.transforms.functional as TF
 from . import dense_transforms
 
 import matplotlib.pyplot as plt
-from IPython import display
 from time import sleep
 
 RESCUE_TIMEOUT = 30
@@ -148,9 +147,6 @@ class PyTux:
                 if planner:
                     ap = self._point_on_track(kart.distance_down_track + TRACK_OFFSET, track)
                     ax.add_artist(plt.Circle(WH2*(1+aim_point_image), 2, ec='g', fill=False, lw=1.5))
-
-                display.display(plt.gcf())
-                display.clear_output(wait=True)
                 plt.pause(1e-3)
 
                 with io.BytesIO() as buff:

@@ -18,16 +18,16 @@ def control(aim_point, current_vel):
         action.brake = True
 
     if aim_point[0] < 0:
-        if aim_point[0] > -0.3:
-            action.steer = 3.3*aim_point[0]
+        if aim_point[0] > -0.25:
+            action.steer = 4*aim_point[0]
         else:
             action.steer = -1
     elif aim_point[0] > 0:
-        if aim_point[0] > 0.3:
-            action.steer = 3.3*aim_point[0]
+        if aim_point[0] > 0.25:
+            action.steer = 4*aim_point[0]
         else:
             action.steer = 1
-    if aim_point[0] > 0.4 or aim_point[0] < -0.4:
+    if aim_point[0] > 0.35 or aim_point[0] < -0.35:
         action.drift = True
 
     """

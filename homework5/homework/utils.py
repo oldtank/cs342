@@ -44,6 +44,7 @@ class PyTux:
     _singleton = None
 
     def __init__(self, screen_width=128, screen_height=96):
+        PyTux._singleton = None
         if PyTux._singleton is None:
             assert PyTux._singleton is None, "Cannot create more than one pytux object"
             PyTux._singleton = self

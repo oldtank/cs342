@@ -105,6 +105,9 @@ class PyTux:
 
         if verbose:
             fig, ax = plt.subplots(1, 1)
+
+        frames = []
+
         for t in range(max_frames):
 
             state.update()
@@ -148,11 +151,22 @@ class PyTux:
 
                 display.display(plt.gcf())
                 display.clear_output(wait=True)
-                sleep(0.2)
-                # plt.pause(1e-3)
+                plt.pause(1e-3)
+
+                with io.BytesIO() as buff:
+                    fig.savefig(buff, format='raw')
+                    buff.seek(0)
+                    data = np.frombuffer(buff.getvalue(), dtype=np.uint8)
+                w, h = fig.canvas.get_width_height()
+                im = data.reshape((int(h), int(w), -1))
+
+                frames.append(im)
 
             self.k.step(action)
             t += 1
+        if verbose:
+            import imageio
+            imageio.mimwrite("test.mp4", frames, fps=30, bitrate=1000000)
         return t, kart.overall_distance / track.length
 
     def close(self):

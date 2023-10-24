@@ -82,6 +82,8 @@ class PyTux:
                               data
         :return: Number of steps played
         """
+        import io
+        
         if self.k is not None and self.k.config.track == track:
             self.k.restart()
             self.k.step()

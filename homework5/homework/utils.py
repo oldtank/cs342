@@ -6,7 +6,8 @@ import torchvision.transforms.functional as TF
 from . import dense_transforms
 
 import matplotlib.pyplot as plt
-import matplotlib
+from IPython import display
+from time import sleep
 
 RESCUE_TIMEOUT = 30
 TRACK_OFFSET = 15
@@ -43,13 +44,14 @@ class PyTux:
     _singleton = None
 
     def __init__(self, screen_width=128, screen_height=96):
-        assert PyTux._singleton is None, "Cannot create more than one pytux object"
-        PyTux._singleton = self
-        self.config = pystk.GraphicsConfig.hd()
-        self.config.screen_width = screen_width
-        self.config.screen_height = screen_height
-        pystk.init(self.config)
-        self.k = None
+        if PyTux._singleton is None:
+            assert PyTux._singleton is None, "Cannot create more than one pytux object"
+            PyTux._singleton = self
+            self.config = pystk.GraphicsConfig.hd()
+            self.config.screen_width = screen_width
+            self.config.screen_height = screen_height
+            pystk.init(self.config)
+            self.k = None
 
     @staticmethod
     def _point_on_track(distance, track, offset=0.0):
@@ -142,7 +144,11 @@ class PyTux:
                 if planner:
                     ap = self._point_on_track(kart.distance_down_track + TRACK_OFFSET, track)
                     ax.add_artist(plt.Circle(WH2*(1+aim_point_image), 2, ec='g', fill=False, lw=1.5))
-                plt.pause(1e-3)
+
+                display.display(plt.gcf())
+                display.clear_output(wait=True)
+                sleep(0.2)
+                # plt.pause(1e-3)
 
             self.k.step(action)
             t += 1

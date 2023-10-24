@@ -37,7 +37,7 @@ if __name__ == '__main__':
     axes1.set_xlabel('x')
     axes1.set_ylabel('y')
     axes1.set_title('title')
-
+    plt.show()
     display.display(plt.gcf())
     display.clear_output(wait=True)
     sleep(0.3)
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     axes1.set_xlabel('x')
     axes1.set_ylabel('y')
     axes1.set_title('title')
-
+    plt.show()
     # plt.pause(1)
     display.display(plt.gcf())
     display.clear_output(wait=True)
@@ -58,4 +58,5 @@ if __name__ == '__main__':
     axes1.set_xlabel('x')
     axes1.set_ylabel('y')
     axes1.set_title('title')
+    plt.show()
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

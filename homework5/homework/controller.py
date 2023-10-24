@@ -31,7 +31,7 @@ def control(aim_point, current_vel):
             action.acceleration = (target_velocity - current_vel) / target_velocity
     
 
-    action.steer = steer_sign * min(steer_magnitude, 1)
+    action.steer = steer_sign * min(1.2*steer_magnitude, 1)
     if steer_magnitude > 2:
         action.drift = True
     if steer_magnitude > 5:

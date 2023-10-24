@@ -166,7 +166,7 @@ class PyTux:
         if verbose:
             import imageio
 
-            imageio.mimwrite("test.mp4", frames, fps=30, bitrate=1000000)
+            imageio.mimwrite("test.mp4", frames, fps=100, bitrate=1000000)
         return t, kart.overall_distance / track.length
       
     def close(self):

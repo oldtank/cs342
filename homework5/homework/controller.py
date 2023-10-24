@@ -27,7 +27,7 @@ def control(aim_point, current_vel):
             action.steer = 4*aim_point[0]
         else:
             action.steer = 1
-    if aim_point[0] > 0.35 or aim_point[0] < -0.35:
+    if aim_point[0] > 0.3 or aim_point[0] < -0.3:
         action.drift = True
 
     """

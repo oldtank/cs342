@@ -7,7 +7,6 @@ from . import dense_transforms
 
 import matplotlib.pyplot as plt
 import matplotlib
-matplotlib.use('Agg')
 
 RESCUE_TIMEOUT = 30
 TRACK_OFFSET = 15
@@ -147,7 +146,6 @@ class PyTux:
 
             self.k.step(action)
             t += 1
-        plt.savefig('test.png')
         return t, kart.overall_distance / track.length
 
     def close(self):

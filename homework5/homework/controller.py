@@ -13,12 +13,12 @@ def control(aim_point, current_vel):
 
     if current_vel < target_velocity:
         action.acceleration = (target_velocity - current_vel) / target_velocity
-    else if current_vel > target_velocity:
+    elif current_vel > target_velocity:
         action.brake = True
     
     if aim_point[0] < 0:
         action.steer = -1
-    else if aim_point[0] > 0:
+    elif aim_point[0] > 0:
         action.steer = 1
 
     """

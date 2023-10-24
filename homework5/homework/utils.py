@@ -145,6 +145,7 @@ class PyTux:
 
             self.k.step(action)
             t += 1
+        plt.show()
         return t, kart.overall_distance / track.length
 
     def close(self):

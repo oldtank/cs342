@@ -9,6 +9,7 @@ def control(aim_point, current_vel):
     :return: a pystk.Action (set acceleration, brake, steer, drift)
     """
     action = pystk.Action()
+    action.acceleration =1 
 
     """
     Your code here

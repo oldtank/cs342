@@ -36,7 +36,7 @@ def control(aim_point, current_vel):
     action.steer = steer_sign * min(1.25*steer_magnitude, 1)
     if steer_magnitude > 2:
         action.drift = True
-    if steer_magnitude > 5:
+    if steer_magnitude > 10:
         action.brake=True
     
     # if aim_point[0] < 0:

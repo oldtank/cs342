@@ -29,8 +29,8 @@ def control(aim_point, current_vel):
     if current_vel < target_velocity:
         if steer_magnitude < 10:
             action.acceleration = (target_velocity - current_vel) / target_velocity
-        else:
-            action.acceleration = 0.01
+        # else:
+        #     action.acceleration = 0.01
     
 
     action.steer = steer_sign * min(1.25*steer_magnitude, 1)

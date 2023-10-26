@@ -79,7 +79,6 @@ class Planner(torch.nn.Module):
             # Add the skip connection
             z = torch.cat([z, up_activation[i]], dim=1)
         heatmap = self.classifier(z).squeeze(1)
-        print(heatmap.shape)
         return spatial_argmax(heatmap)
 
 

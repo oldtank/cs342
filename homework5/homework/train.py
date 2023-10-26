@@ -33,7 +33,7 @@ def train(args):
                                          dense_transforms.ToTensor()
                                      ]))
     global_step = 0
-    for epoch in range(1):
+    for epoch in range(args.epoch):
         print('Starting epoch % 3d' % epoch)
         model.train()
 
@@ -41,8 +41,6 @@ def train(args):
             if device is not None:
                 batch_image, batch_label = batch_image.to(device),batch_label.to(device)
             output = model(batch_image)
-            print(batch_label.shape)
-            print(output.shape)
 
             # loss and accuracy
             loss_val = loss(output, batch_label)
@@ -58,7 +56,6 @@ def train(args):
             optimizer.step()
             global_step+=1
 
-    raise NotImplementedError('Detector.forward')
     save_model(model)
 
 def log(logger, img, label, pred, global_step):

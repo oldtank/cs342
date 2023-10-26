@@ -6,17 +6,59 @@ from .utils import load_data
 from . import dense_transforms
 
 def train(args):
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+
     from os import path
-    model = Planner()
+    model = Planner().to(device)
+
+    if args.continue_training:
+        model.load_state_dict(torch.load(path.join(path.dirname(path.abspath(__file__)), 'planner.th')))
+
     train_logger, valid_logger = None, None
     if args.log_dir is not None:
-        train_logger = tb.SummaryWriter(path.join(args.log_dir, 'train'))
+        train_logger = tb.SummaryWriter(path.join(args.log_dir, 'train'), flush_secs=1)
 
     """
     Your code here, modify your HW4 code
     Hint: Use the log function below to debug and visualize your model
     """
+    optimizer = torch.optim.Adam(model.parameters(), lr=5e-5, weight_decay=1e-5)
+    loss = torch.nn.MSELoss().to(device)
 
+    train_data = load_data('drive_data', num_workers=4,
+                                     batch_size=32,
+                                     transform=dense_transforms.Compose([
+                                         dense_transforms.ColorJitter(0.9, 0.9, 0.9, 0.1),
+                                         dense_transforms.RandomHorizontalFlip(),
+                                         dense_transforms.ToTensor()
+                                     ]))
+    global_step = 0
+    for epoch in range(1):
+        print('Starting epoch % 3d' % epoch)
+        model.train()
+
+        for batch_image, batch_label in train_data:
+            if device is not None:
+                batch_image, batch_label = batch_image.to(device),batch_label.to(device)
+            output = model(batch_image)
+            print(batch_label.shape)
+            print(output.shape)
+
+            # loss and accuracy
+            loss_val = loss(output, batch_label)
+
+            if train_logger is not None:
+                train_logger.add_scalar('size loss', loss_val, global_step)
+
+            if train_logger is not None and global_step %100 ==0:
+                log(train_logger, batch_image, batch_label, output, global_step)
+
+            optimizer.zero_grad()
+            loss_val.backword()
+            optimizer.step()
+            global_step+=1
+
+    raise NotImplementedError('Detector.forward')
     save_model(model)
 
 def log(logger, img, label, pred, global_step):
@@ -42,8 +84,12 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--log_dir')
+    parser.add_argument('--log_dir', default='logs/')
     # Put custom arguments here
+    parser.add_argument('-e', '--epoch', default=100, type=int)
+    parser.add_argument('-t', '--transform',
+                        default='Compose([ColorJitter(0.9, 0.9, 0.9, 0.1), RandomHorizontalFlip(), ToTensor(), ToHeatmap()])')
+    parser.add_argument('-c', '--continue_training', default=False)
 
     args = parser.parse_args()
     train(args)

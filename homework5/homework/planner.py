@@ -65,7 +65,7 @@ class Planner(torch.nn.Module):
         self.classifier = torch.nn.Conv2d(c, 1, 1)
 
     def forward(self, img):
-        z = self.normalize(x)
+        z = self.normalize(img)
         up_activation = []
         for i in range(self.n_conv):
             # Add all the information required for skip connections

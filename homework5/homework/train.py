@@ -54,7 +54,7 @@ def train(args):
                 log(train_logger, batch_image, batch_label, output, global_step)
 
             optimizer.zero_grad()
-            loss_val.backword()
+            loss_val.backward()
             optimizer.step()
             global_step+=1
 

@@ -40,6 +40,8 @@ class Team:
         self.num_players = None
         self.model = torch.jit.load(path.join(path.dirname(path.abspath(__file__)), 'state_agent.pt'))
 
+        self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+
     def new_match(self, team: int, num_players: int) -> list:
         """
         Let's start a new match. You're playing on a `team` with `num_players` and have the option of choosing your kart
@@ -91,6 +93,6 @@ class Team:
         actions = []
         for player_id, pstate in enumerate(player_state):
             features = get_featuers_for_player(pstate, soccer_state, self.team)
-            acceleration, steer, brake = self.model(features.view(1,1,11))
+            acceleration, steer, brake = self.model(features.to(self.device).view(1,1,11))
             actions.append(dict(acceleration=acceleration, steer=steer, brake=brake))
         return actions

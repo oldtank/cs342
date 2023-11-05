@@ -39,24 +39,29 @@ def get_featuers_for_player(player, soccer_state, team_id, actions):
 
     return data, label
 class PlayerDataset(Dataset):
-    def __init__(self, dataset_path):
+    def __init__(self):
         self.data = []
         from os import path
         home_dir = path.dirname(path.dirname(path.abspath(__file__)))
         for filename in os.listdir(home_dir):
             if filename.endswith(".pkl"):
                 with open(filename, "rb") as f:
+                    team_name = 'team1_state' if filename.startswith('0_') else 'team2_state'
+                    team_id = 0 if filename.startswith('0_') else 1
+                    player1_idx = 0 if filename.startswith('0_') else 1
+                    player2_idx = 2 if filename.startswith('0_') else 3
                     while True:
                         try:
                             states = pickle.load(f)
                             # player1
                             player1_data, player1_label = get_featuers_for_player(
-                                states['team1_state'][0], states['soccer_state'], 0,
-                                states['actions'][0]
+                                states[team_name][0], states['soccer_state'], team_id,
+                                states['actions'][player1_idx]
                             )
+                            #player2
                             player2_data, player2_label = get_featuers_for_player(
-                                states['team1_state'][1], states['soccer_state'], 1,
-                                states['actions'][2]
+                                states[team_name][1], states['soccer_state'], team_id,
+                                states['actions'][player2_idx]
                             )
 
                             self.data.append((player1_data, player1_label))
@@ -76,8 +81,8 @@ class PlayerDataset(Dataset):
     def count(self):
         return len(self.data)
 
-def load_data(dataset_path, num_workers=0, batch_size=128):
-    dataset = PlayerDataset(path.join(path.dirname(path.dirname(path.abspath(__file__))),dataset_path))
+def load_data(num_workers=0, batch_size=128):
+    dataset = PlayerDataset()
     print(dataset.count())
 
     return DataLoader(dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True, drop_last=True)
@@ -88,6 +93,4 @@ if __name__ == '__main__':
     # jurgen_agent* 91
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--file')
-    args = parser.parse_args()
-    train_data = load_data(args.file)
+    train_data = load_data()

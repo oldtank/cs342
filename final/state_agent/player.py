@@ -39,7 +39,7 @@ class Team:
         self.team = None
         self.num_players = None
         self.model = torch.jit.load(path.join(path.dirname(path.abspath(__file__)), 'state_agent.pt'))
-
+        print(self.model)
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
     def new_match(self, team: int, num_players: int) -> list:

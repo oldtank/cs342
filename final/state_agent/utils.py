@@ -10,6 +10,11 @@ def limit_period(angle):
     # turn angle into -1 to 1
     return angle - torch.floor(angle / 2 + 0.5) * 2
 
+def hasNan(x):
+    nan_mask = torch.isnan(x)
+    nan_present = torch.any(nan_mask)
+    return nan_present.item()
+
 def get_featuers_for_player(player, soccer_state, team_id, actions):
     kart_front = torch.tensor(player['kart']['front'])[[0, 2]]
     kart_center = torch.tensor(player['kart']['location'])[[0, 2]]
@@ -64,8 +69,11 @@ class PlayerDataset(Dataset):
                                 states['actions'][player2_idx]
                             )
 
-                            self.data.append((player1_data, player1_label))
-                            self.data.append((player2_data, player2_label))
+                            if not hasNan(player1_data) and not hasNan(player1_label):
+                                self.data.append((player1_data, player1_label))
+
+                            if not hasNan(player2_data) and not hasNan(player2_label):
+                                self.data.append((player2_data, player2_label))
 
                             # print(player1_data)
                             # print(player1_label)

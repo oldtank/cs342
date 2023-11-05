@@ -12,7 +12,7 @@ def train(args):
     model = StateAgentModel(input_size=11).to(device)
     if args.continue_training:
         model.load_state_dict(torch.load(path.join(path.dirname(path.abspath(__file__)), 'state_agent.th')))
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-6, weight_decay=1e-5)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay=1e-5)
     loss = torch.nn.MSELoss().to(device)
 
     train_logger, valid_logger = None, None
@@ -54,6 +54,7 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--epoch', default=20, type=int)
     parser.add_argument('-c', '--continue_training', default=False)
     parser.add_argument('-f', '--file')
+    parser.add_argument('-lr', '--learning_rate', default=1e-4, type=float)
 
     args = parser.parse_args()
     train(args)

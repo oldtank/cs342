@@ -42,6 +42,7 @@ class Team:
         self.team = None
         self.num_players = None
         self.model = torch.jit.load(path.join(path.dirname(path.abspath(__file__)), 'jurgen_agent.pt'))
+        print(self.model)
 
     def new_match(self, team: int, num_players: int) -> list:
         """

@@ -40,6 +40,9 @@ def train(args):
             if train_logger is not None:
                 train_logger.add_scalar('loss', loss_val, global_step)
 
+            if global_step % 200 == 0:
+                print('loss val % f' % loss_val)
+
             if math.isnan(loss_val.item()):
                 print('nan. label: %s, output: %s' % (repr(batch_label), repr(output)))
                 break

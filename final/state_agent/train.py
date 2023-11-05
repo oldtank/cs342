@@ -3,6 +3,7 @@ import numpy as np
 import torch.utils.tensorboard as tb
 from .utils import load_data
 from .model import StateAgentModel, save_model
+from os import path
 
 def train(args):
     from os import path

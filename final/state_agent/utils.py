@@ -2,6 +2,7 @@ from torch.utils.data import Dataset, DataLoader
 import pickle
 import torch
 import numpy as np
+from os import path
 
 def limit_period(angle):
     # turn angle into -1 to 1
@@ -71,7 +72,7 @@ class PlayerDataset(Dataset):
         return len(self.data)
 
 def load_data(dataset_path, num_workers=0, batch_size=128):
-    dataset = PlayerDataset(dataset_path)
+    dataset = PlayerDataset(path.join(path.dirname(path.dirname(path.abspath(__file__))),dataset_path))
     return DataLoader(dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True, drop_last=True)
 
 if __name__ == '__main__':

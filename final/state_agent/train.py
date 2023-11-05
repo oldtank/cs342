@@ -4,6 +4,7 @@ import torch.utils.tensorboard as tb
 from .utils import load_data
 from .model import StateAgentModel, save_model
 from os import path
+import math
 
 def train(args):
     from os import path
@@ -36,7 +37,13 @@ def train(args):
             output = model(batch_data)
             loss_val = loss(output, batch_label)
 
-            print('loss val % f' % loss_val)
+            if train_logger is not None:
+                train_logger.add_scalar('loss', loss_val, global_step)
+
+            if math.isnan(loss_val.item()):
+                print('nan. label: %s, output: %s' % (repr(batch_label), repr(output)))
+                break
+            # print('loss val % f' % loss_val)
             optimizer.zero_grad()
             loss_val.backward()
             optimizer.step()

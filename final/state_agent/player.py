@@ -91,6 +91,6 @@ class Team:
         actions = []
         for player_id, pstate in enumerate(player_state):
             features = get_featuers_for_player(pstate, soccer_state, self.team)
-            acceleration, steer, brake = self.model(features)
+            acceleration, steer, brake = self.model(features.view(1,1,11))
             actions.append(dict(acceleration=acceleration, steer=steer, brake=brake))
         return actions

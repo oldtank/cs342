@@ -24,11 +24,9 @@ class StateAgentModel(torch.nn.Module):
         self.fc2 = torch.nn.Linear(32, 64)
         self.relu2 = torch.nn.ReLU()
         self.fc3 = torch.nn.Linear(64, 128)
-        self.relu3 = torch.nn.ReLU()
+
         self.fc4 = torch.nn.Linear(128, 64)
-        self.relu4 = torch.nn.ReLU()
         self.fc5 = torch.nn.Linear(64, 32)
-        self.relu5 = torch.nn.ReLU()
         self.fc6 = torch.nn.Linear(32, 3)
 
         self.network = torch.nn.Sequential(

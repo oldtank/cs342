@@ -20,7 +20,7 @@ def train(args):
         train_logger = tb.SummaryWriter(path.join(args.log_dir, 'train'), flush_secs=1)
         valid_logger = tb.SummaryWriter(path.join(args.log_dir, 'valid'), flush_secs=1)
 
-    train_data = load_data(args.file, num_workers=4,batch_size=32)
+    train_data = load_data(num_workers=4,batch_size=32)
     global_step = 1
 
     model.train()
@@ -53,7 +53,6 @@ if __name__ == '__main__':
     # Put custom arguments here
     parser.add_argument('-e', '--epoch', default=20, type=int)
     parser.add_argument('-c', '--continue_training', default=False)
-    parser.add_argument('-f', '--file')
     parser.add_argument('-lr', '--learning_rate', default=1e-4, type=float)
 
     args = parser.parse_args()

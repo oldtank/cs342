@@ -1,3 +1,32 @@
+import torch
+from os import path
+
+def limit_period(angle):
+    # turn angle into -1 to 1
+    return angle - torch.floor(angle / 2 + 0.5) * 2
+
+def get_featuers_for_player(player, soccer_state, team_id):
+    kart_front = torch.tensor(player['kart']['front'])[[0, 2]]
+    kart_center = torch.tensor(player['kart']['location'])[[0, 2]]
+    kart_direction = (kart_front - kart_center) / torch.norm(kart_front - kart_center)
+    kart_angle = torch.atan2(kart_direction[1], kart_direction[0])
+
+    # soccer
+    puck_center = torch.tensor(soccer_state['ball']['location'], dtype=torch.float32)[[0, 2]]
+    kart_to_puck_direction = (puck_center - kart_center) / torch.norm(puck_center - kart_center)
+    kart_to_puck_angle = torch.atan2(kart_to_puck_direction[1], kart_to_puck_direction[0])
+
+    kart_to_puck_angle_difference = limit_period((kart_angle - kart_to_puck_angle) / np.pi)
+
+    # soccer line
+    goal_line_center = torch.tensor(soccer_state['goal_line'][team_id], dtype=torch.float32)[:, [0, 2]].mean(dim=0)
+    puck_to_goal_line = (goal_line_center - puck_center) / torch.norm(goal_line_center - puck_center)
+
+    data = torch.tensor([kart_center[0], kart_center[1], kart_angle, kart_to_puck_angle,
+                  goal_line_center[0], goal_line_center[1], kart_to_puck_angle_difference,
+                  puck_center[0], puck_center[1], puck_to_goal_line[0], puck_to_goal_line[1]], dtype=torch.float32)
+
+    return data
 
 class Team:
     agent_type = 'state'
@@ -9,6 +38,7 @@ class Team:
         """
         self.team = None
         self.num_players = None
+        self.model = torch.jit.load(path.join(path.dirname(path.abspath(__file__)), 'state_agent.pt'))
 
     def new_match(self, team: int, num_players: int) -> list:
         """
@@ -24,7 +54,7 @@ class Team:
            TODO: feel free to edit or delete any of the code below
         """
         self.team, self.num_players = team, num_players
-        return ['tux'] * num_players
+        return ['beastie'] * num_players
 
     def act(self, player_state, opponent_state, soccer_state):
         """
@@ -58,4 +88,9 @@ class Team:
                  steer:        float -1..1 steering angle
         """
         # TODO: Change me. I'm just cruising straight
-        return [dict(acceleration=1, steer=0)] * self.num_players
+        actions = []
+        for player_id, pstate in enumerate(player_state):
+            features = get_featuers_for_player(pstate, soccer_state, self.team)
+            acceleration, steer, brake = self.model(features)
+            actions.append(dict(acceleration=acceleration, steer=steer, brake=brake))
+        return actions

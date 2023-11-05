@@ -32,11 +32,8 @@ class StateAgentModel(torch.nn.Module):
         self.network = torch.nn.Sequential(
             self.fc1,self.relu1,self.fc2,self.relu2,
             self.fc3,
-            self.relu3,
             self.fc4,
-            self.relu4,
             self.fc5,
-            self.relu5,
             self.fc6
         )
 

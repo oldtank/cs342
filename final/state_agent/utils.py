@@ -1,3 +1,5 @@
+import os
+
 from torch.utils.data import Dataset, DataLoader
 import pickle
 import torch
@@ -40,27 +42,30 @@ class PlayerDataset(Dataset):
     def __init__(self, dataset_path):
         self.data = []
         from os import path
-        with open(path.join('state_agent', dataset_path), "rb") as f:
-            while True:
-                try:
-                    states = pickle.load(f)
-                    # player1
-                    player1_data, player1_label = get_featuers_for_player(
-                        states['team1_state'][0], states['soccer_state'], 0,
-                        states['actions'][0]
-                    )
-                    player2_data, player2_label = get_featuers_for_player(
-                        states['team1_state'][1], states['soccer_state'], 1,
-                        states['actions'][2]
-                    )
+        home_dir = path.dirname(path.dirname(path.abspath(__file__)))
+        for filename in os.listdir(home_dir):
+            if filename.endswith(".pkl"):
+                with open(filename, "rb") as f:
+                    while True:
+                        try:
+                            states = pickle.load(f)
+                            # player1
+                            player1_data, player1_label = get_featuers_for_player(
+                                states['team1_state'][0], states['soccer_state'], 0,
+                                states['actions'][0]
+                            )
+                            player2_data, player2_label = get_featuers_for_player(
+                                states['team1_state'][1], states['soccer_state'], 1,
+                                states['actions'][2]
+                            )
 
-                    self.data.append((player1_data, player1_label))
-                    self.data.append((player2_data, player2_label))
+                            self.data.append((player1_data, player1_label))
+                            self.data.append((player2_data, player2_label))
 
-                    # print(player1_data)
-                    # print(player1_label)
-                except EOFError:
-                    break
+                            # print(player1_data)
+                            # print(player1_label)
+                        except EOFError:
+                            break
 
     def __len__(self):
         return len(self.data)
@@ -73,6 +78,8 @@ class PlayerDataset(Dataset):
 
 def load_data(dataset_path, num_workers=0, batch_size=128):
     dataset = PlayerDataset(path.join(path.dirname(path.dirname(path.abspath(__file__))),dataset_path))
+    print(dataset.count())
+
     return DataLoader(dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True, drop_last=True)
 
 if __name__ == '__main__':

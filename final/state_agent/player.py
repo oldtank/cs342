@@ -94,9 +94,10 @@ class Team:
         for player_id, pstate in enumerate(player_state):
             features = get_featuers_for_player(pstate, soccer_state, self.team)
             acceleration, steer, brake = self.model(features.to(self.device))
-            acceleration_val = acceleration[0][0]
-            steer_val = steer[0][0]
-            brake_val = 1 if brake[0][0] > 0.5 else 0
+            
+            acceleration_val = acceleration[0].item()
+            steer_val = steer[0].item()
+            brake_val = 1 if brake[0].item() > 0.5 else 0
             if brake_val== 1:
                 acceleration_val = 0
             actions.append(dict(acceleration=acceleration_val, steer=steer_val, brake=brake_val))

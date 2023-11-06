@@ -27,14 +27,17 @@ class StateAgentModel(torch.nn.Module):
 
         self.fc4 = torch.nn.Linear(128, 64)
         self.fc5 = torch.nn.Linear(64, 32)
-        self.fc6 = torch.nn.Linear(32, 3)
+
+        # Output layers
+        self.output1 = torch.nn.Linear(32, 1)  # First output (floating-point)
+        self.output2 = torch.nn.Linear(32, 1)  # Second output (floating-point)
+        self.output3 = torch.nn.Linear(32, 1)  # Third output (floating-point)
 
         self.network = torch.nn.Sequential(
             self.fc1,self.relu1,self.fc2,self.relu2,
             self.fc3,
             self.fc4,
             self.fc5,
-            self.fc6
         )
 
     def forward(self, x):
@@ -48,9 +51,15 @@ class StateAgentModel(torch.nn.Module):
         # x = self.relu4(self.fc2(x))
         # x = self.fc3(x)
 
-        x = x.squeeze(1)
         x= self.network(x)
-        return x
+
+        acceleration = torch.sigmoid(self.output1(x))
+        steer = torch.tanh(self.output2(x))
+        brake = torch.sigmoid(self.output3(x))
+
+        # brake_mask = brake > 0.5
+        # acceleration[brake_mask] = 0
+        return acceleration, steer, brake
 
 def save_model(model):
     from torch import save

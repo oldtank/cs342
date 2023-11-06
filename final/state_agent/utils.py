@@ -63,14 +63,31 @@ class PlayerDataset(Dataset):
                                 states[team_name][0], states['soccer_state'], team_id,
                                 states['actions'][player1_idx]
                             )
+                            # if player1_label[0] > 1:
+                            #     print('acce: % f' % player1_label[0])
+
+
+
+                            # if player1_label[0]==0 and player1_label[2] != 0:
+                            #     print('reversing. break value: % f' % player1_label[2])
+                            if player1_label[0] != 0 and player1_label[2] != 0:
+                                print('accel+brake. acce: % f, break value: % f' % (player1_label[0], player1_label[2]))
+
+                            if not hasNan(player1_data) and not hasNan(player1_label):
+                                self.data.append((player1_data, player1_label))
+
+
                             #player2
                             player2_data, player2_label = get_featuers_for_player(
                                 states[team_name][1], states['soccer_state'], team_id,
                                 states['actions'][player2_idx]
                             )
-
-                            if not hasNan(player1_data) and not hasNan(player1_label):
-                                self.data.append((player1_data, player1_label))
+                            # if player2_label[0] > 1 :
+                            #     print('acce: % f' % player2_label[0])
+                            # if player2_label[0]==0 and player2_label[2] != 0:
+                            #     print('reversing. break value: % f' % player2_label[2])
+                            if player2_label[0] != 0 and player2_label[2] != 0:
+                                print('accel+brake. acce: % f, break value: % f' % (player2_label[0], player2_label[2]))
 
                             if not hasNan(player2_data) and not hasNan(player2_label):
                                 self.data.append((player2_data, player2_label))

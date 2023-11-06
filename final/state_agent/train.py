@@ -63,7 +63,7 @@ def train(args):
             if train_logger is not None:
                 train_logger.add_scalar('loss', loss_val, global_step)
 
-            if global_step % 200 == 0:
+            if global_step % 1000 == 0:
                 print('loss val % f' % loss_val)
 
             if math.isnan(loss_val.item()):

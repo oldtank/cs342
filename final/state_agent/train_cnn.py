@@ -35,7 +35,7 @@ def train(args):
 
     model = ConvoModel().to(device)
     if args.continue_training:
-        model.load_state_dict(torch.load(path.join(path.dirname(path.abspath(__file__)), 'state_agent.th')))
+        model.load_state_dict(torch.load(path.join(path.dirname(path.abspath(__file__)), 'cnn_agent.th')))
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay=1e-5)
 
     loss = CustomLoss(device)

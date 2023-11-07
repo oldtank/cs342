@@ -24,13 +24,13 @@ class CustomLoss(torch.nn.Module):
         brake_loss_val = self.brake_loss(brake, batch_label[:, 2].unsqueeze(1))
         acceleration_loss_val = self.acceleration_loss(acceleration, batch_label[:, 0].unsqueeze(1))
 
-        return steer_loss_val + brake_loss_val + 0.5*acceleration_loss_val
+        return steer_loss_val + brake_loss_val + acceleration_loss_val
 
 def train(args):
     from os import path
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-    model = StateAgentModel(input_size=11).to(device)
+    model = StateAgentModel().to(device)
     if args.continue_training:
         model.load_state_dict(torch.load(path.join(path.dirname(path.abspath(__file__)), 'state_agent.th')))
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay=1e-5)

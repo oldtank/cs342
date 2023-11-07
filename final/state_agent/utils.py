@@ -29,7 +29,7 @@ def get_featuers_for_player(player, soccer_state, team_id, actions):
     kart_to_puck_angle_difference = limit_period((kart_angle - kart_to_puck_angle) / np.pi)
 
     # soccer line
-    goal_line_center = torch.tensor(soccer_state['goal_line'][team_id], dtype=torch.float32)[:, [0, 2]].mean(dim=0)
+    goal_line_center = torch.tensor(soccer_state['goal_line'][(team_id+1)%2], dtype=torch.float32)[:, [0, 2]].mean(dim=0)
     puck_to_goal_line = (goal_line_center - puck_center) / torch.norm(goal_line_center - puck_center)
 
     # actions

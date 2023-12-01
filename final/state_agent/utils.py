@@ -6,6 +6,16 @@ import torch
 import numpy as np
 from os import path
 
+
+def load_recording(recording):
+    from pickle import load
+    with open(recording, 'rb') as f:
+        while True:
+            try:
+                yield load(f)
+            except EOFError:
+                break
+
 def limit_period(angle):
     # turn angle into -1 to 1
     return angle - torch.floor(angle / 2 + 0.5) * 2
@@ -15,87 +25,110 @@ def hasNan(x):
     nan_present = torch.any(nan_mask)
     return nan_present.item()
 
-def get_featuers_for_player(player, soccer_state, team_id, actions):
-    kart_front = torch.tensor(player['kart']['front'])[[0, 2]]
-    kart_center = torch.tensor(player['kart']['location'])[[0, 2]]
-    kart_direction = (kart_front - kart_center) / torch.norm(kart_front - kart_center)
-    kart_angle = torch.atan2(kart_direction[1], kart_direction[0])
+def extract_features(pstate, soccer_state, opponent_state, team_id, actions):
+    eps = 1e-10  # Small constant
 
-    # soccer
+    # features of ego-vehicle
+    kart_front = torch.tensor(pstate['kart']['front'], dtype=torch.float32)[[0, 2]]
+    kart_center = torch.tensor(pstate['kart']['location'], dtype=torch.float32)[[0, 2]]
+    kart_direction = (kart_front-kart_center) / (torch.norm(kart_front-kart_center) + eps)
+    kart_angle = torch.atan2(kart_direction[1], kart_direction[0] + eps)
+
+    # features of soccer 
     puck_center = torch.tensor(soccer_state['ball']['location'], dtype=torch.float32)[[0, 2]]
-    kart_to_puck_direction = (puck_center - kart_center) / torch.norm(puck_center - kart_center)
-    kart_to_puck_angle = torch.atan2(kart_to_puck_direction[1], kart_to_puck_direction[0])
+    kart_to_puck_direction = (puck_center - kart_center) / (torch.norm(puck_center-kart_center) + eps)
+    kart_to_puck_angle = torch.atan2(kart_to_puck_direction[1], kart_to_puck_direction[0] + eps) 
 
-    kart_to_puck_angle_difference = limit_period((kart_angle - kart_to_puck_angle) / np.pi)
+    kart_to_puck_angle_difference = limit_period((kart_angle - kart_to_puck_angle)/np.pi)
+ 
+    # features of opponents 
+    opponent_center0 = torch.tensor(opponent_state[0]['kart']['location'], dtype=torch.float32)[[0, 2]]
+    opponent_center1 = torch.tensor(opponent_state[1]['kart']['location'], dtype=torch.float32)[[0, 2]]
 
-    # soccer line
+    # kart_to_opponent0 = (opponent_center0 - kart_center) / torch.norm(opponent_center0-kart_center)
+    # kart_to_opponent1 = (opponent_center1 - kart_center) / torch.norm(opponent_center1-kart_center)
+
+    # kart_to_opponent0_angle = torch.atan2(kart_to_opponent0[1], kart_to_opponent0[0]) 
+    # kart_to_opponent1_angle = torch.atan2(kart_to_opponent1[1], kart_to_opponent1[0]) 
+
+    # kart_to_opponent0_angle_difference = limit_period((kart_angle - kart_to_opponent0_angle)/np.pi)
+    # kart_to_opponent1_angle_difference = limit_period((kart_angle - kart_to_opponent1_angle)/np.pi)
+
+    
+    # features of score-line 
     goal_line_center = torch.tensor(soccer_state['goal_line'][(team_id+1)%2], dtype=torch.float32)[:, [0, 2]].mean(dim=0)
-    puck_to_goal_line = (goal_line_center - puck_center) / torch.norm(goal_line_center - puck_center)
 
-    # actions
-    acceleration = actions['acceleration'].item()
-    steer = actions['steer'].item()
-    brake = actions['brake'].item()
+    puck_to_goal_line = (goal_line_center-puck_center) / torch.norm(goal_line_center-puck_center)
 
-    data = torch.tensor([kart_center[0], kart_center[1], kart_angle, kart_to_puck_angle,
-                  goal_line_center[0], goal_line_center[1], kart_to_puck_angle_difference,
-                  puck_center[0], puck_center[1], puck_to_goal_line[0], puck_to_goal_line[1]], dtype=torch.float32)
-    label = torch.tensor([acceleration, steer, brake], dtype=torch.float32)
+    features = torch.tensor([kart_center[0], kart_center[1], kart_angle, kart_to_puck_angle, 
+        goal_line_center[0], goal_line_center[1], kart_to_puck_angle_difference, 
+        puck_center[0], puck_center[1], puck_to_goal_line[0], puck_to_goal_line[1]], dtype=torch.float32)
+    
+    if actions is None:
+        features = features.unsqueeze(0)
+        return features, None
 
-    return data, label
+    if len(actions.keys()) == 0:
+        print('NO ACTIONS HERE!!!')
+        return None, None
+    
+    acceleration = actions.get('acceleration').item()
+    # if hasNan(actions.get('acceleration')) or hasNan(actions.get('steer')) or hasNan(actions.get('brake')):
+    #     return None, None
+
+    if not 0 <= acceleration <= 1:
+        acceleration = .5
+    assert 0 <= acceleration <= 1, "Values for acceleration are out of range [0, 1]"    
+    assert -1 <= actions.get('steer').item() <= 1, "Values for steer are out of range [-1, 1]"
+    assert 0 <= actions.get('brake').item() <= 1, "Values for brake are out of range [0, 1]"
+
+    label = torch.tensor([actions.get('acceleration').item(), 
+                          actions.get('steer').item(), 
+                          actions.get('brake').item()], dtype=torch.float32)
+    return features, label
+
 class PlayerDataset(Dataset):
-    def __init__(self):
+    def __init__(self, data_path):
         self.data = []
-        from os import path
-        home_dir = path.dirname(path.dirname(path.abspath(__file__)))
-        for filename in os.listdir(home_dir):
-            if filename.endswith(".pkl"):
-                with open(filename, "rb") as f:
-                    team_name = 'team1_state' if filename.startswith('0_') else 'team2_state'
-                    team_id = 0 if filename.startswith('0_') else 1
-                    player1_idx = 0 if filename.startswith('0_') else 1
-                    player2_idx = 2 if filename.startswith('0_') else 3
-                    while True:
-                        try:
-                            states = pickle.load(f)
-                            # player1
-                            player1_data, player1_label = get_featuers_for_player(
-                                states[team_name][0], states['soccer_state'], team_id,
-                                states['actions'][player1_idx]
-                            )
-                            # if player1_label[0] > 1:
-                            #     print('acce: % f' % player1_label[0])
 
+        for filename in os.listdir(data_path): 
+            print(filename)
+            if filename.endswith(".pkl") and filename.startswith("jurgen"):
+                score_file = filename.replace('.pkl', '__score.txt')
+                with open(os.path.join(data_path, score_file), "r") as s:
+                    # read tuple from scorefile
 
+                    scores = tuple(map(int, s.read().split(',')))
+                recording = load_recording(os.path.join(data_path, filename))
+                print(scores)
+                for record in recording:
+                    if scores[0] > scores[1] and scores[1] == 0:
+                        # break
+                        # first team is the winner, use its players for training data
+                        pstates = record['team1_state']
+                        opponent_state = record['team2_state']
+                        team_id = 0
+                    elif scores[1] > scores[0] and scores[0] == 0:
+                        # second team is the winner, use its players for training data
+                        pstates = record['team2_state']
+                        opponent_state = record['team1_state']
+                        team_id = 1
+                    else:
+                        # teams tied. don't add to training data
+                        continue
 
-                            # if player1_label[0]==0 and player1_label[2] != 0:
-                            #     print('reversing. break value: % f' % player1_label[2])
-                            if player1_label[0] != 0 and player1_label[2] != 0:
-                                print('accel+brake. acce: % f, break value: % f' % (player1_label[0], player1_label[2]))
-
-                            if not hasNan(player1_data) and not hasNan(player1_label):
-                                self.data.append((player1_data, player1_label))
-
-
-                            #player2
-                            player2_data, player2_label = get_featuers_for_player(
-                                states[team_name][1], states['soccer_state'], team_id,
-                                states['actions'][player2_idx]
-                            )
-                            # if player2_label[0] > 1 :
-                            #     print('acce: % f' % player2_label[0])
-                            # if player2_label[0]==0 and player2_label[2] != 0:
-                            #     print('reversing. break value: % f' % player2_label[2])
-                            if player2_label[0] != 0 and player2_label[2] != 0:
-                                print('accel+brake. acce: % f, break value: % f' % (player2_label[0], player2_label[2]))
-
-                            if not hasNan(player2_data) and not hasNan(player2_label):
-                                self.data.append((player2_data, player2_label))
-
-                            # print(player1_data)
-                            # print(player1_label)
-                        except EOFError:
+                    actions = record['actions']
+                    for i, pstate in enumerate(pstates):
+                        # for each player, get the features + action label (if there is an action)
+                        player_data, player_label = extract_features(pstate, record['soccer_state'], opponent_state, team_id, actions[team_id + i*2])
+                        if player_data is None or player_label is None or hasNan(player_data) or hasNan(player_label):
                             break
+                        self.data.append((player_data, player_label))
+
+            # if len(self.data) > 0: 
+            #     break # todo: uncomment this line to only load one recording
+
+            #     break
 
     def __len__(self):
         return len(self.data)
@@ -106,16 +139,19 @@ class PlayerDataset(Dataset):
     def count(self):
         return len(self.data)
 
-def load_data(num_workers=0, batch_size=128):
-    dataset = PlayerDataset()
-    print(dataset.count())
-
+def load_data(data_path, num_workers=0, batch_size=128):
+    dataset = PlayerDataset(data_path)
+    print("num rows in dataset:", len(dataset))
     return DataLoader(dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True, drop_last=True)
 
-if __name__ == '__main__':
-    # image_jurgen_agent
-    # yann_agent
-    # jurgen_agent* 91
-    import argparse
-    parser = argparse.ArgumentParser()
-    train_data = load_data()
+# if __name__ == '__main__':
+#     import argparse
+#     parser = argparse.ArgumentParser()
+#     from os import path
+#     home_dir = path.dirname(path.dirname(path.abspath(__file__)))
+#     # train_data = load_data(os.path.join(home_dir, 'recordings'))
+#     train_data = load_data('recordings_2', batch_size=32, num_workers=2)
+#     print("num batches in dataset", len(train_data))
+#     pickle.dump(train_data, open('super_winners_only.pkl', 'wb'))
+#     # pickle.load(open('train_data_3.pkl', 'rb'))
+#     # print(len(train_data))
